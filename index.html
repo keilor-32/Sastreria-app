@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sastrería - Sistema Cámara en Vivo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .bg-dark { background-color: #080808; }
+        .bg-card { background-color: #121212; }
+    </style>
+</head>
+<body class="bg-dark text-gray-100 font-sans min-h-screen flex flex-col justify-center items-center p-4 md:p-6">
+
+    <div class="bg-card p-8 md:p-10 rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] border border-zinc-800 w-full max-w-xl transition-all duration-300">
+        
+        <!-- SECCIÓN LOGIN -->
+        <div id="sec-login" class="flex flex-col space-y-5">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-center mb-2 text-amber-500 tracking-wider">SASTRERÍA</h1>
+            <p class="text-gray-400 text-center mb-4">Inicia sesión para continuar</p>
+            
+            <form onsubmit="iniciarSesion(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-300 uppercase mb-2">Usuario</label>
+                    <input type="text" id="login-user" required class="w-full p-4 text-lg bg-zinc-900 border border-zinc-700 rounded-xl text-white focus:border-amber-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-300 uppercase mb-2">Contraseña</label>
+                    <input type="password" id="login-pass" required class="w-full p-4 text-lg bg-zinc-900 border border-zinc-700 rounded-xl text-white focus:border-amber-500 focus:outline-none">
+                </div>
+                <p id="login-error" class="text-red-500 text-sm hidden text-center">Usuario o contraseña incorrectos.</p>
+                <button type="submit" class="w-full py-4 mt-2 text-lg bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl shadow-md transition-all">
+                    Ingresar
+                </button>
+            </form>
+        </div>
+
+        <!-- MENÚ PRINCIPAL -->
+        <div id="menu-principal" class="hidden flex flex-col space-y-5">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl md:text-3xl font-extrabold text-amber-500 tracking-wider">MENÚ PRINCIPAL</h1>
+                <button onclick="cerrarSesion()" class="text-sm text-gray-400 hover:text-red-400">🚪 Salir</button>
+            </div>
+            
+            <button onclick="cambiarSeccion('sec-buscar')" class="w-full py-5 text-lg bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-2xl shadow-lg transition-all transform hover:-translate-y-1">
+                🔍 Buscar Cliente
+            </button>
+            <button onclick="cambiarSeccion('sec-hombre')" class="w-full py-5 text-lg bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-2xl border border-zinc-700 shadow-lg transition-all transform hover:-translate-y-1">
+                👨 Registrar Cliente Hombre
+            </button>
+            <button onclick="cambiarSeccion('sec-mujer')" class="w-full py-5 text-lg bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-2xl border border-zinc-700 shadow-lg transition-all transform hover:-translate-y-1">
+                👩 Registrar Cliente Mujer
+            </button>
+            
+            <hr class="border-zinc-800 my-2">
+            
+            <button onclick="cambiarSeccion('sec-admin')" class="w-full py-4 text-base bg-zinc-900 hover:bg-zinc-800 text-amber-500 font-bold rounded-2xl border border-amber-600/30 transition-all">
+                ⚙️ Constructor de Bloques (Admin)
+            </button>
+        </div>
+
+        <!-- SECCIÓN HOMBRE -->
+        <div id="sec-hombre" class="hidden flex flex-col space-y-4">
+            <h2 class="text-2xl font-bold text-center text-amber-500 mb-2">👨 Prenda de Hombre</h2>
+            <button onclick="abrirFormulario('Hombre', 'Pantalón')" class="w-full py-4 text-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl font-medium text-left px-6 transition-colors">👖 Pantalón</button>
+            <button onclick="abrirFormulario('Hombre', 'Saco')" class="w-full py-4 text-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl font-medium text-left px-6 transition-colors">🧥 Saco</button>
+            <button onclick="abrirFormulario('Hombre', 'Chaleco')" class="w-full py-4 text-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl font-medium text-left px-6 transition-colors">🦺 Chaleco</button>
+            <button onclick="abrirFormulario('Hombre', 'Traje Completo')" class="w-full py-4 text-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl font-medium text-left px-6 transition-colors">💼 Traje Completo</button>
+            <button onclick="regresarMenu()" class="text-base text-gray-400 hover:text-white underline text-center mt-4">← Volver al Menú</button>
+        </div>
+
+        <!-- SECCIÓN MUJER -->
+        <div id="sec-mujer" class="hidden flex flex-col space-y-4">
+            <h2 class="text-2xl font-bold text-center text-amber-500 mb-2">👩 Prenda de Mujer</h2>
+            <button onclick="abrirFormulario('Mujer', 'Pantalón')" class="w-full py-4 text-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl font-medium text-left px-6 transition-colors">👖 Pantalón</button>
+            <button onclick="abrirFormulario('Mujer', 'Falda')" class="w-full py-4 text-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl font-medium text-left px-6 transition-colors">👗 Falda</button>
+            <button onclick="abrirFormulario('Mujer', 'Saco')" class="w-full py-4 text-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl font-medium text-left px-6 transition-colors">🧥 Saco</button>
+            <button onclick="abrirFormulario('Mujer', 'Chaleco')" class="w-full py-4 text-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl font-medium text-left px-6 transition-colors">🦺 Chaleco</button>
+            <button onclick="abrirFormulario('Mujer', 'Traje Completo')" class="w-full py-4 text-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl font-medium text-left px-6 transition-colors">💼 Traje Completo</button>
+            <button onclick="regresarMenu()" class="text-base text-gray-400 hover:text-white underline text-center mt-4">← Volver al Menú</button>
+        </div>
+
+        <!-- SECCIÓN ADMIN -->
+        <div id="sec-admin" class="hidden flex flex-col space-y-5">
+            <h2 class="text-2xl font-bold text-center text-amber-500">⚙️ Crear Bloques</h2>
+            
+            <div class="space-y-4 bg-zinc-900 p-5 rounded-xl border border-zinc-800 shadow-inner">
+                <div>
+                    <label class="block text-sm font-bold text-gray-300 uppercase mb-2">Nombre de la Medida</label>
+                    <input type="text" id="nuevo-campo-nombre" placeholder="Ej: Cintura, Tipo de Tela..." class="w-full p-3 text-base bg-zinc-800 border border-zinc-700 rounded-xl text-white focus:border-amber-500 focus:outline-none">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-gray-300 uppercase mb-2">Tipo de Bloque</label>
+                    <select id="nuevo-campo-tipo" onchange="verificarTipoCampo()" class="w-full p-3 text-base bg-zinc-800 border border-zinc-700 rounded-xl text-white focus:border-amber-500 focus:outline-none">
+                        <option value="text">Cuadro de Texto Corto</option>
+                        <option value="number">Cuadro Numérico</option>
+                        <option value="select">Lista Desplegable (Menú de opciones)</option>
+                    </select>
+                </div>
+                
+                <div id="contenedor-opciones" class="hidden">
+                    <label class="block text-sm font-bold text-amber-500 uppercase mb-2">Opciones separadas por coma (,)</label>
+                    <input type="text" id="nuevo-campo-opciones" placeholder="Ej: Clásico, Entallado, Recto" class="w-full p-3 text-base bg-zinc-950 border border-amber-600/50 rounded-xl text-white focus:border-amber-500 focus:outline-none">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-gray-300 uppercase mb-2">¿A qué formulario pertenece?</label>
+                    <select id="nuevo-campo-destino" class="w-full p-3 text-base bg-zinc-800 border border-zinc-700 rounded-xl text-white focus:border-amber-500 focus:outline-none">
+                        <option value="Todos">🌐 Global (Aparecerá en todas las prendas)</option>
+                        <optgroup label="👨 Hombre">
+                            <option value="Hombre-Pantalón">Hombre - Pantalón</option>
+                            <option value="Hombre-Saco">Hombre - Saco</option>
+                            <option value="Hombre-Chaleco">Hombre - Chaleco</option>
+                            <option value="Hombre-Traje Completo">Hombre - Traje Completo</option>
+                        </optgroup>
+                        <optgroup label="👩 Mujer">
+                            <option value="Mujer-Pantalón">Mujer - Pantalón</option>
+                            <option value="Mujer-Falda">Mujer - Falda</option>
+                            <option value="Mujer-Saco">Mujer - Saco</option>
+                            <option value="Mujer-Chaleco">Mujer - Chaleco</option>
+                            <option value="Mujer-Traje Completo">Mujer - Traje Completo</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <button onclick="agregarCampoDinamico()" class="w-full py-3.5 text-base bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl transition-all shadow-md">
+                    + Añadir Bloque
+                </button>
+            </div>
+
+            <!-- FILTRO DE ADMINISTRADOR -->
+            <div class="mt-4 p-3 bg-zinc-900 border border-zinc-800 rounded-xl">
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Filtrar vista del Administrador:</label>
+                <select id="filtro-admin" onchange="renderListaCamposAdmin()" class="w-full p-2 text-sm bg-zinc-950 border border-zinc-700 rounded-lg text-amber-500 focus:outline-none">
+                    <option value="Todos">Ver todos los bloques mezclados</option>
+                    <option value="Hombre-Pantalón">Solo Hombre - Pantalón</option>
+                    <option value="Hombre-Saco">Solo Hombre - Saco</option>
+                    <option value="Hombre-Chaleco">Solo Hombre - Chaleco</option>
+                    <option value="Mujer-Pantalón">Solo Mujer - Pantalón</option>
+                    <option value="Mujer-Falda">Solo Mujer - Falda</option>
+                    <option value="Mujer-Saco">Solo Mujer - Saco</option>
+                    <option value="Mujer-Chaleco">Solo Mujer - Chaleco</option>
+                </select>
+            </div>
+
+            <h3 class="text-lg font-bold text-gray-200 mt-2 flex justify-between">
+                <span>Bloques Creados:</span>
+                <span class="text-sm text-gray-500 font-normal">Ordena con ⬆️ ⬇️</span>
+            </h3>
+            <div id="lista-campos-dinamicos" class="space-y-3 max-h-64 overflow-y-auto pr-2"></div>
+
+            <button onclick="regresarMenu()" class="text-base text-gray-400 hover:text-white underline text-center mt-4">← Volver al Menú</button>
+        </div>
+
+        <!-- SECCIÓN BUSCAR -->
+        <div id="sec-buscar" class="hidden flex flex-col space-y-5">
+            <h2 class="text-2xl font-bold text-center text-amber-500">🔍 Buscar Cliente</h2>
+            <input type="text" id="input-buscar" placeholder="Escribe el nombre..." class="w-full p-4 text-base md:text-lg bg-zinc-900 border border-zinc-700 rounded-xl focus:border-amber-500 text-white focus:outline-none">
+            <button onclick="buscarCliente()" class="w-full py-4 text-lg bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl shadow-md">Buscar</button>
+            <div id="resultados-busqueda" class="mt-4 p-4 bg-zinc-900 rounded-xl border border-zinc-800 max-h-96 overflow-y-auto space-y-3"></div>
+            <button onclick="regresarMenu()" class="text-base text-gray-400 hover:text-white underline text-center mt-4">← Volver</button>
+        </div>
+
+        <!-- FORMULARIO DE MEDIDAS -->
+        <div id="sec-formulario" class="hidden flex flex-col space-y-5">
+            <h2 id="form-titulo" class="text-2xl font-bold text-center text-amber-500">📝 Registro</h2>
+            
+            <form id="form-medidas" onsubmit="guardarDatos(event)" class="space-y-6">
+                <input type="hidden" id="form-genero">
+                <input type="hidden" id="form-prenda">
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-300 uppercase mb-2">Nombre del Cliente *</label>
+                    <input type="text" id="nombre-cliente" required placeholder="Nombre completo" class="w-full p-3.5 text-base bg-zinc-900 border border-zinc-700 rounded-xl text-white focus:border-amber-500 focus:outline-none">
+                </div>
+
+                <div id="campos-dinamicos-inyectados" class="space-y-5 grid grid-cols-1 gap-2 mt-4"></div>
+
+                <!-- BLOQUE DE CÁMARA EN VIVO -->
+                <div class="mt-4 p-5 bg-zinc-900 border border-zinc-800 rounded-xl shadow-inner">
+                    <label class="block text-sm font-bold text-amber-500 uppercase mb-3">📸 Foto de Tela / Referencia</label>
+                    
+                    <button type="button" id="btn-abrir-camara" onclick="iniciarCamara()" class="w-full py-3 text-base bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-white font-bold rounded-xl transition-all flex items-center justify-center space-x-2">
+                        <span>📷</span> <span>Abrir Cámara</span>
+                    </button>
+
+                    <div id="contenedor-camara" class="hidden flex-col items-center w-full space-y-3 mt-3">
+                        <video id="video-camara" autoplay playsinline class="w-full max-h-72 object-cover rounded-xl border-2 border-amber-600 shadow-md bg-black"></video>
+                        <button type="button" onclick="tomarFotoEnVivo()" class="w-full py-4 text-lg bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl shadow-[0_0_10px_rgba(217,119,6,0.5)] transition-all">
+                            📸 Capturar
+                        </button>
+                    </div>
+                    
+                    <div id="vista-previa-contenedor" class="hidden mt-3 flex-col items-center justify-center bg-zinc-950 p-4 rounded-xl border border-zinc-800 space-y-3">
+                        <img id="vista-previa-foto" class="max-h-48 rounded-lg object-contain shadow-md border border-zinc-700">
+                        <button type="button" onclick="descartarFoto()" class="w-full py-2 bg-red-600/80 hover:bg-red-500 text-white font-bold rounded-lg text-sm transition-colors">
+                            🔄 Descartar y Tomar Otra
+                        </button>
+                    </div>
+
+                    <input type="hidden" id="foto-base64">
+                </div>
+
+                <button type="submit" class="w-full py-4 text-lg bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl shadow-[0_0_15px_rgba(217,119,6,0.4)] transition-all">
+                    💾 Guardar Datos
+                </button>
+            </form>
+            <button onclick="regresarSubmenu()" class="text-base text-gray-400 hover:text-white underline text-center mt-2">← Atrás</button>
+        </div>
+    </div>
+
+    <!-- Botón flotante para instalar PWA (Oculto por defecto) -->
+    <button id="btn-instalar" class="hidden fixed bottom-6 right-6 bg-amber-600 hover:bg-amber-500 text-white font-bold py-4 px-5 rounded-full shadow-[0_4px_20px_rgba(217,119,6,0.5)] z-50 transition-transform transform hover:scale-105 flex items-center space-x-2 border border-amber-500">
+        <span class="text-2xl">📱</span>
+        <span class="text-base uppercase tracking-wider">Instalar App</span>
+    </button>
+
+    <script>
+        // === TU URL DE GOOGLE ===
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzPNjautx58k_ON3HzoCUUOFXM2rbya5VcdFWZGdDtjFibQtfzXzuXQF_m0nVJYbBuFFg/exec";
+        
+        let camposPersonalizados = JSON.parse(localStorage.getItem('camposSastreriaFinal')) || [];
+        let streamCamaraGlobal = null;
+
+        function iniciarSesion(e) {
+            e.preventDefault();
+            const user = document.getElementById('login-user').value;
+            const pass = document.getElementById('login-pass').value;
+            if(user === "admin" && pass === "1234") {
+                cambiarSeccion('menu-principal');
+                document.getElementById('login-error').classList.add('hidden');
+            } else {
+                document.getElementById('login-error').classList.remove('hidden');
+            }
+        }
+
+        function cerrarSesion() {
+            document.getElementById('login-user').value = '';
+            document.getElementById('login-pass').value = '';
+            cambiarSeccion('sec-login');
+        }
+
+        function cambiarSeccion(idSeccion) {
+            apagarCamara();
+            ['sec-login', 'menu-principal', 'sec-buscar', 'sec-hombre', 'sec-mujer', 'sec-formulario', 'sec-admin'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(idSeccion).classList.remove('hidden');
+            if(idSeccion === 'sec-admin') renderListaCamposAdmin();
+        }
+
+        function regresarMenu() { cambiarSeccion('menu-principal'); }
+        function regresarSubmenu() {
+            const genero = document.getElementById('form-genero').value;
+            cambiarSeccion(genero === 'Hombre' ? 'sec-hombre' : 'sec-mujer');
+        }
+
+        function verificarTipoCampo() {
+            const tipo = document.getElementById('nuevo-campo-tipo').value;
+            const contOpciones = document.getElementById('contenedor-opciones');
+            if(tipo === 'select') {
+                contOpciones.classList.remove('hidden');
+            } else {
+                contOpciones.classList.add('hidden');
+            }
+        }
+
+        function agregarCampoDinamico() {
+            const nombre = document.getElementById('nuevo-campo-nombre').value.trim();
+            const tipo = document.getElementById('nuevo-campo-tipo').value;
+            const destino = document.getElementById('nuevo-campo-destino').value;
+            let opciones = '';
+            
+            if(!nombre) return alert("Por favor, ingresa un nombre para la medida.");
+            if (tipo === 'select') {
+                opciones = document.getElementById('nuevo-campo-opciones').value.trim();
+                if(!opciones) return alert("Has elegido Lista Desplegable. Por favor, escribe las opciones.");
+            }
+
+            const idFormateado = "custom_" + Date.now(); 
+            
+            camposPersonalizados.push({ id: idFormateado, nombre: nombre, tipo: tipo, destino: destino, opciones: opciones });
+            localStorage.setItem('camposSastreriaFinal', JSON.stringify(camposPersonalizados));
+            
+            document.getElementById('nuevo-campo-nombre').value = '';
+            document.getElementById('nuevo-campo-opciones').value = '';
+            renderListaCamposAdmin();
+        }
+
+        function moverCampo(index, direccion) {
+            if (direccion === -1 && index > 0) {
+                let temp = camposPersonalizados[index - 1];
+                camposPersonalizados[index - 1] = camposPersonalizados[index];
+                camposPersonalizados[index] = temp;
+            } else if (direccion === 1 && index < camposPersonalizados.length - 1) {
+                let temp = camposPersonalizados[index + 1];
+                camposPersonalizados[index + 1] = camposPersonalizados[index];
+                camposPersonalizados[index] = temp;
+            }
+            localStorage.setItem('camposSastreriaFinal', JSON.stringify(camposPersonalizados));
+            renderListaCamposAdmin();
+        }
+
+        function renderListaCamposAdmin() {
+            const lista = document.getElementById('lista-campos-dinamicos');
+            const filtroActual = document.getElementById('filtro-admin').value;
+            lista.innerHTML = '';
+            
+            if(camposPersonalizados.length === 0) {
+                lista.innerHTML = '<p class="text-gray-500 text-sm text-center italic">No hay bloques creados.</p>';
+                return;
+            }
+
+            let elementosMostrados = 0;
+
+            camposPersonalizados.forEach((campo, index) => {
+                if (filtroActual !== 'Todos' && campo.destino !== filtroActual && campo.destino !== 'Todos') return; 
+                
+                elementosMostrados++;
+                let etiquetaTipo = campo.tipo === 'select' ? 'Lista' : (campo.tipo === 'number' ? 'Núm.' : 'Texto');
+                let badgeDestino = campo.destino === 'Todos' ? 'Global' : campo.destino.replace('-', ' ');
+
+                let btnArriba = index > 0 ? `<button onclick="moverCampo(${index}, -1)" class="bg-zinc-700 hover:bg-amber-600 text-white rounded p-2 text-xs transition-colors">⬆️</button>` : `<div class="w-8"></div>`;
+                let btnAbajo = index < camposPersonalizados.length - 1 ? `<button onclick="moverCampo(${index}, 1)" class="bg-zinc-700 hover:bg-amber-600 text-white rounded p-2 text-xs transition-colors">⬇️</button>` : `<div class="w-8"></div>`;
+
+                lista.innerHTML += `
+                    <div class="flex justify-between items-center bg-zinc-800 p-3 rounded-xl border border-zinc-700 shadow-sm">
+                        <div class="flex flex-col flex-grow">
+                            <span class="text-white text-base font-bold">${campo.nombre} <span class="text-gray-400 font-normal text-xs ml-1">(${etiquetaTipo})</span></span>
+                            <div class="mt-1"><span class="bg-zinc-900 text-amber-500 border border-amber-600/30 px-2 py-0.5 rounded text-xs">${badgeDestino}</span></div>
+                        </div>
+                        <div class="flex items-center space-x-2 ml-2">
+                            ${btnArriba}
+                            ${btnAbajo}
+                            <button onclick="eliminarCampo(${index})" class="text-red-500 text-xl font-bold hover:text-red-400 p-2 ml-2">🗑️</button>
+                        </div>
+                    </div>`;
+            });
+
+            if (elementosMostrados === 0) {
+                lista.innerHTML = `<p class="text-gray-500 text-sm text-center italic">No hay bloques creados para la categoría "${filtroActual}".</p>`;
+            }
+        }
+
+        function eliminarCampo(index) {
+            if(confirm("¿Seguro que deseas eliminar este bloque?")) {
+                camposPersonalizados.splice(index, 1);
+                localStorage.setItem('camposSastreriaFinal', JSON.stringify(camposPersonalizados));
+                renderListaCamposAdmin();
+            }
+        }
+
+        async function iniciarCamara() {
+            try {
+                const video = document.getElementById('video-camara');
+                streamCamaraGlobal = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'environment' }, audio: false 
+                });
+                video.srcObject = streamCamaraGlobal;
+                
+                document.getElementById('btn-abrir-camara').classList.add('hidden');
+                document.getElementById('vista-previa-contenedor').classList.add('hidden');
+                document.getElementById('contenedor-camara').classList.remove('hidden');
+                document.getElementById('contenedor-camara').classList.add('flex');
+            } catch (error) {
+                alert("No se pudo acceder a la cámara. Asegúrate de dar permisos a tu navegador.");
+                console.error("Error cámara:", error);
+            }
+        }
+
+        function apagarCamara() {
+            if (streamCamaraGlobal) {
+                streamCamaraGlobal.getTracks().forEach(track => track.stop());
+                streamCamaraGlobal = null;
+            }
+        }
+
+        function tomarFotoEnVivo() {
+            const video = document.getElementById('video-camara');
+            const canvas = document.createElement('canvas');
+            const maxAncho = 600;
+            const proporcion = maxAncho / video.videoWidth;
+            canvas.width = maxAncho;
+            canvas.height = video.videoHeight * proporcion;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const base64Comprimido = canvas.toDataURL('image/jpeg', 0.6);
+            
+            document.getElementById('vista-previa-foto').src = base64Comprimido;
+            document.getElementById('foto-base64').value = base64Comprimido;
+            
+            apagarCamara();
+            document.getElementById('contenedor-camara').classList.remove('flex');
+            document.getElementById('contenedor-camara').classList.add('hidden');
+            
+            document.getElementById('vista-previa-contenedor').classList.remove('hidden');
+            document.getElementById('vista-previa-contenedor').classList.add('flex');
+            
+            document.getElementById('btn-abrir-camara').classList.remove('hidden');
+            document.getElementById('btn-abrir-camara').innerHTML = "<span>📷</span> <span>Tomar foto nueva</span>";
+        }
+
+        function descartarFoto() {
+            document.getElementById('foto-base64').value = "";
+            document.getElementById('vista-previa-contenedor').classList.add('hidden');
+            iniciarCamara();
+        }
+
+        function abrirFormulario(genero, prenda) {
+            document.getElementById('form-genero').value = genero;
+            document.getElementById('form-prenda').value = prenda;
+            document.getElementById('form-titulo').innerText = `✏️ ${prenda.toUpperCase()} (${genero.toUpperCase()})`;
+            document.getElementById('form-medidas').reset();
+            
+            apagarCamara();
+            document.getElementById('btn-abrir-camara').classList.remove('hidden');
+            document.getElementById('btn-abrir-camara').innerHTML = "<span>📷</span> <span>Abrir Cámara</span>";
+            document.getElementById('contenedor-camara').classList.add('hidden');
+            document.getElementById('contenedor-camara').classList.remove('flex');
+            document.getElementById('vista-previa-contenedor').classList.add('hidden');
+            document.getElementById('vista-previa-contenedor').classList.remove('flex');
+            document.getElementById('foto-base64').value = '';
+            
+            const contenedorDinamico = document.getElementById('campos-dinamicos-inyectados');
+            contenedorDinamico.innerHTML = '';
+
+            const identificadorActual = `${genero}-${prenda}`;
+            const camposParaEstaPrenda = camposPersonalizados.filter(c => c.destino === 'Todos' || c.destino === identificadorActual);
+
+            if (camposParaEstaPrenda.length === 0) {
+                contenedorDinamico.innerHTML = `<p class="text-amber-500 text-center text-sm p-4 border border-amber-500/30 rounded-xl bg-amber-500/10">No has creado medidas para <b>${identificadorActual.replace('-', ' ')}</b>.</p>`;
+            }
+
+            camposParaEstaPrenda.forEach(campo => {
+                let htmlCampo = '';
+                if (campo.tipo === 'select') {
+                    let opcionesHTML = '<option value="">Selecciona una opción...</option>';
+                    campo.opciones.split(',').forEach(opc => {
+                        let opcLimpia = opc.trim(); 
+                        if(opcLimpia !== '') opcionesHTML += `<option value="${opcLimpia}">${opcLimpia}</option>`;
+                    });
+                    htmlCampo = `
+                        <div>
+                            <label class="block text-sm font-bold text-gray-300 uppercase mb-2">${campo.nombre}</label>
+                            <select id="${campo.id}" class="w-full p-3.5 text-base bg-zinc-900 border border-zinc-700 rounded-xl text-white focus:border-amber-500 focus:outline-none">
+                                ${opcionesHTML}
+                            </select>
+                        </div>
+                    `;
+                } else {
+                    htmlCampo = `
+                        <div>
+                            <label class="block text-sm font-bold text-gray-300 uppercase mb-2">${campo.nombre}</label>
+                            <input type="${campo.tipo}" id="${campo.id}" placeholder="Escribe aquí..." class="w-full p-3.5 text-base bg-zinc-900 border border-zinc-700 rounded-xl text-white focus:border-amber-500 focus:outline-none">
+                        </div>
+                    `;
+                }
+                contenedorDinamico.innerHTML += htmlCampo;
+            });
+            cambiarSeccion('sec-formulario');
+        }
+
+        async function guardarDatos(e) {
+            e.preventDefault();
+
+            const codigoIngresado = prompt("🔒 Ingrese el código de seguridad (1234b):");
+            if (codigoIngresado !== "1234b") {
+                alert("❌ Código incorrecto."); return;
+            }
+            
+            const genero = document.getElementById('form-genero').value;
+            const prenda = document.getElementById('form-prenda').value;
+            const identificadorActual = `${genero}-${prenda}`;
+
+            let datos = {
+                action: "add",
+                fecha: new Date().toLocaleDateString(),
+                genero: genero,
+                prenda: prenda,
+                nombre: document.getElementById('nombre-cliente').value
+            };
+
+            const camposParaEstaPrenda = camposPersonalizados.filter(c => c.destino === 'Todos' || c.destino === identificadorActual);
+            camposParaEstaPrenda.forEach(campo => {
+                const inputElement = document.getElementById(campo.id);
+                if(inputElement) datos[campo.nombre] = inputElement.value;
+            });
+
+            const fotoData = document.getElementById('foto-base64').value;
+            if(fotoData !== "") datos['foto_referencia'] = fotoData;
+
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(datos)
+                });
+                alert("✅ ¡Datos guardados en Google Sheets!");
+                regresarMenu();
+            } catch (error) {
+                alert("Error de conexión al guardar.");
+            }
+        }
+
+        async function buscarCliente() {
+            const query = document.getElementById('input-buscar').value.toLowerCase();
+            const contenedor = document.getElementById('resultados-busqueda');
+            if (!query) return;
+            
+            contenedor.innerHTML = "<p class='text-amber-500 text-lg animate-pulse text-center'>Buscando en la base de datos...</p>";
+
+            try {
+                let res = await fetch(`${WEB_APP_URL}?action=get`);
+                let lista = await res.json();
+                let resultados = lista.filter(item => item.nombre && item.nombre.toLowerCase().includes(query));
+
+                if (resultados.length === 0) {
+                    contenedor.innerHTML = "<p class='text-gray-400 text-lg text-center'>No se encontraron clientes.</p>"; return;
+                }
+
+                contenedor.innerHTML = "";
+                resultados.forEach(c => {
+                    let detallesHTML = ""; let imagenHTML = "";
+                    for (let key in c) {
+                        if (['fecha', 'genero', 'prenda', 'nombre', 'action'].includes(key)) continue;
+                        if (c[key] !== "") { 
+                            if (key === 'foto_referencia' && c[key].startsWith('data:image')) {
+                                imagenHTML = `<div class="mt-3"><p class="text-xs text-amber-500 uppercase font-bold mb-1">Foto:</p><img src="${c[key]}" class="h-32 rounded-lg object-cover border border-zinc-700"></div>`;
+                            } else {
+                                detallesHTML += `<span class="text-gray-300 text-sm"><b class="text-gray-400">${key}:</b> ${c[key]}</span><br>`;
+                            }
+                        }
+                    }
+
+                    contenedor.innerHTML += `
+                        <div class="p-4 bg-zinc-800 rounded-xl border-l-4 border-amber-500 space-y-2 shadow-md">
+                            <strong class="text-white text-lg">${c.nombre}</strong> 
+                            <span class="text-sm text-amber-500 font-bold ml-2">(${c.genero} - ${c.prenda})</span>
+                            <p class="text-xs text-gray-500 mb-2">${c.fecha || ''}</p>
+                            <div class="mt-2 leading-relaxed bg-zinc-900 p-3 rounded-lg border border-zinc-700">
+                                ${detallesHTML} ${imagenHTML}
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                contenedor.innerHTML = "<p class='text-red-500 text-lg text-center'>Error al consultar Google Sheets.</p>";
+            }
+        }
+
+        // ==========================================
+        // CÓDIGO DE INSTALACIÓN PWA EN MEMORIA
+        // ==========================================
+        const iconoBase64 = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIj48cmVjdCB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgZmlsbD0iI2Q5NzcwNiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjEwMCIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSJ3aGl0ZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+UzwvdGV4dD48L3N2Zz4=";
+        const manifest = {
+            name: "Sastrería App", short_name: "Sastrería",
+            start_url: window.location.href, display: "standalone",
+            background_color: "#080808", theme_color: "#d97706",
+            icons: [{ src: iconoBase64, sizes: "192x192", type: "image/svg+xml" }, { src: iconoBase64, sizes: "512x512", type: "image/svg+xml" }]
+        };
+        const blobManifest = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+        const manifestURL = URL.createObjectURL(blobManifest);
+        document.head.insertAdjacentHTML('beforeend', `<link rel="manifest" href="${manifestURL}">`);
+
+        let eventoInstalacion = null;
+        const btnInstalar = document.getElementById('btn-instalar');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault(); eventoInstalacion = e;
+            btnInstalar.classList.remove('hidden');
+        });
+
+        btnInstalar.addEventListener('click', async () => {
+            if (!eventoInstalacion) return;
+            eventoInstalacion.prompt();
+            const { outcome } = await eventoInstalacion.userChoice;
+            if (outcome === 'accepted') btnInstalar.classList.add('hidden');
+            eventoInstalacion = null;
+        });
+
+        window.addEventListener('appinstalled', () => { btnInstalar.classList.add('hidden'); });
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js');
+            });
+        }
+    </script>
+</body>
+</html>
