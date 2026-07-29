@@ -42,8 +42,11 @@
                 <button onclick="cerrarSesion()" class="text-sm text-gray-400 hover:text-red-400">🚪 Salir</button>
             </div>
             
+            <button onclick="mostrarTodos()" class="w-full py-5 text-lg bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl shadow-lg transition-all transform hover:-translate-y-1">
+                📋 Mostrar Todos los Clientes
+            </button>
             <button onclick="cambiarSeccion('sec-buscar')" class="w-full py-5 text-lg bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-2xl shadow-lg transition-all transform hover:-translate-y-1">
-                🔍 Buscar Cliente
+                🔍 Buscar Cliente Específico
             </button>
             <button onclick="cambiarSeccion('sec-hombre')" class="w-full py-5 text-lg bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-2xl border border-zinc-700 shadow-lg transition-all transform hover:-translate-y-1">
                 👨 Registrar Cliente Hombre
@@ -250,6 +253,12 @@
             });
             document.getElementById(idSeccion).classList.remove('hidden');
             if(idSeccion === 'sec-admin') renderListaCamposAdmin();
+            
+            // Limpiar buscador al salir de esa sección
+            if(idSeccion !== 'sec-buscar') {
+                document.getElementById('input-buscar').value = '';
+                document.getElementById('resultados-busqueda').innerHTML = '';
+            }
         }
 
         function regresarMenu() { cambiarSeccion('menu-principal'); }
@@ -438,6 +447,10 @@
 
             camposParaEstaPrenda.forEach(campo => {
                 let htmlCampo = '';
+                
+                // Se agregó la propiedad "required" a los input y select.
+                // Se agregó 'step="any"' a los input de tipo número para permitir decimales.
+                
                 if (campo.tipo === 'select') {
                     let opcionesHTML = '<option value="">Selecciona una opción...</option>';
                     campo.opciones.split(',').forEach(opc => {
@@ -446,17 +459,18 @@
                     });
                     htmlCampo = `
                         <div>
-                            <label class="block text-sm font-bold text-gray-300 uppercase mb-2">${campo.nombre}</label>
-                            <select id="${campo.id}" class="w-full p-3.5 text-base bg-zinc-900 border border-zinc-700 rounded-xl text-white focus:border-amber-500 focus:outline-none">
+                            <label class="block text-sm font-bold text-gray-300 uppercase mb-2">${campo.nombre} *</label>
+                            <select id="${campo.id}" required class="w-full p-3.5 text-base bg-zinc-900 border border-zinc-700 rounded-xl text-white focus:border-amber-500 focus:outline-none">
                                 ${opcionesHTML}
                             </select>
                         </div>
                     `;
                 } else {
+                    let esDecimal = campo.tipo === 'number' ? 'step="any"' : '';
                     htmlCampo = `
                         <div>
-                            <label class="block text-sm font-bold text-gray-300 uppercase mb-2">${campo.nombre}</label>
-                            <input type="${campo.tipo}" id="${campo.id}" placeholder="Escribe aquí..." class="w-full p-3.5 text-base bg-zinc-900 border border-zinc-700 rounded-xl text-white focus:border-amber-500 focus:outline-none">
+                            <label class="block text-sm font-bold text-gray-300 uppercase mb-2">${campo.nombre} *</label>
+                            <input type="${campo.tipo}" id="${campo.id}" required ${esDecimal} placeholder="Escribe aquí..." class="w-full p-3.5 text-base bg-zinc-900 border border-zinc-700 rounded-xl text-white focus:border-amber-500 focus:outline-none">
                         </div>
                     `;
                 }
@@ -508,6 +522,52 @@
             }
         }
 
+        // Función reutilizable para renderizar tarjetas de clientes
+        function renderizarListaClientes(resultados, contenedor) {
+            if (resultados.length === 0) {
+                contenedor.innerHTML = "<p class='text-gray-400 text-lg text-center'>No hay clientes que mostrar.</p>"; return;
+            }
+
+            contenedor.innerHTML = "";
+            // Invertimos la lista para que el último registro se muestre arriba
+            resultados.slice().reverse().forEach(c => {
+                let detallesHTML = ""; let imagenHTML = "";
+                for (let key in c) {
+                    if (['fecha', 'genero', 'prenda', 'nombre', 'action', 'fila', 'estado'].includes(key)) continue;
+                    if (c[key] !== "") { 
+                        if (key === 'foto_referencia' && c[key].startsWith('data:image')) {
+                            imagenHTML = `<div class="mt-3"><p class="text-xs text-amber-500 uppercase font-bold mb-1">Foto:</p><img src="${c[key]}" class="h-32 rounded-lg object-cover border border-zinc-700"></div>`;
+                        } else {
+                            detallesHTML += `<span class="text-gray-300 text-sm"><b class="text-gray-400 capitalize">${key}:</b> ${c[key]}</span><br>`;
+                        }
+                    }
+                }
+
+                let estadoTexto = c.estado === 'Entregado' 
+                    ? `<span class="text-red-500 font-extrabold text-lg tracking-wider">ENTREGADO</span>`
+                    : `<button id="btn-entregar-${c.fila}" onclick="marcarEntregado(${c.fila})" class="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded-xl shadow-md transition-all">📦 Entregar</button>`;
+
+                let bordeTarjeta = c.estado === 'Entregado' ? 'border-red-500' : 'border-amber-500';
+
+                contenedor.innerHTML += `
+                    <div class="p-4 bg-zinc-800 rounded-xl border-l-4 ${bordeTarjeta} space-y-2 shadow-md transition-all">
+                        <strong class="text-white text-lg">${c.nombre}</strong> 
+                        <span class="text-sm text-amber-500 font-bold ml-2">(${c.genero} - ${c.prenda})</span>
+                        <p class="text-xs text-gray-500 mb-2">${c.fecha || ''}</p>
+                        <div class="mt-2 leading-relaxed bg-zinc-900 p-3 rounded-lg border border-zinc-700">
+                            ${detallesHTML} ${imagenHTML}
+                        </div>
+                        
+                        <!-- SECCIÓN DE BOTONES -->
+                        <div class="mt-4 flex justify-between items-center border-t border-zinc-700 pt-4" id="acciones-${c.fila}">
+                            ${estadoTexto}
+                            <button onclick="editarCliente(${c.fila})" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-xl shadow-md transition-all">✏️ Editar</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
         async function buscarCliente() {
             const query = document.getElementById('input-buscar').value.toLowerCase();
             const contenedor = document.getElementById('resultados-busqueda');
@@ -521,48 +581,27 @@
                 resultadosGlobales = lista; 
                 
                 let resultados = lista.filter(item => item.nombre && item.nombre.toLowerCase().includes(query));
+                renderizarListaClientes(resultados, contenedor);
+            } catch (error) {
+                contenedor.innerHTML = "<p class='text-red-500 text-lg text-center'>Error al consultar Google Sheets.</p>";
+            }
+        }
 
-                if (resultados.length === 0) {
-                    contenedor.innerHTML = "<p class='text-gray-400 text-lg text-center'>No se encontraron clientes.</p>"; return;
-                }
+        // Nueva función: Mostrar a todos los clientes registrados
+        async function mostrarTodos() {
+            cambiarSeccion('sec-buscar');
+            document.getElementById('input-buscar').value = ''; // Limpiamos la barra
+            const contenedor = document.getElementById('resultados-busqueda');
+            contenedor.innerHTML = "<p class='text-amber-500 text-lg animate-pulse text-center'>Cargando todos los registros...</p>";
 
-                contenedor.innerHTML = "";
-                resultados.forEach(c => {
-                    let detallesHTML = ""; let imagenHTML = "";
-                    for (let key in c) {
-                        if (['fecha', 'genero', 'prenda', 'nombre', 'action', 'fila', 'estado'].includes(key)) continue;
-                        if (c[key] !== "") { 
-                            if (key === 'foto_referencia' && c[key].startsWith('data:image')) {
-                                imagenHTML = `<div class="mt-3"><p class="text-xs text-amber-500 uppercase font-bold mb-1">Foto:</p><img src="${c[key]}" class="h-32 rounded-lg object-cover border border-zinc-700"></div>`;
-                            } else {
-                                detallesHTML += `<span class="text-gray-300 text-sm"><b class="text-gray-400 capitalize">${key}:</b> ${c[key]}</span><br>`;
-                            }
-                        }
-                    }
-
-                    let estadoTexto = c.estado === 'Entregado' 
-                        ? `<span class="text-red-500 font-extrabold text-lg tracking-wider">ENTREGADO</span>`
-                        : `<button id="btn-entregar-${c.fila}" onclick="marcarEntregado(${c.fila})" class="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded-xl shadow-md transition-all">📦 Entregar</button>`;
-
-                    let bordeTarjeta = c.estado === 'Entregado' ? 'border-red-500' : 'border-amber-500';
-
-                    contenedor.innerHTML += `
-                        <div class="p-4 bg-zinc-800 rounded-xl border-l-4 ${bordeTarjeta} space-y-2 shadow-md transition-all">
-                            <strong class="text-white text-lg">${c.nombre}</strong> 
-                            <span class="text-sm text-amber-500 font-bold ml-2">(${c.genero} - ${c.prenda})</span>
-                            <p class="text-xs text-gray-500 mb-2">${c.fecha || ''}</p>
-                            <div class="mt-2 leading-relaxed bg-zinc-900 p-3 rounded-lg border border-zinc-700">
-                                ${detallesHTML} ${imagenHTML}
-                            </div>
-                            
-                            <!-- SECCIÓN DE BOTONES -->
-                            <div class="mt-4 flex justify-between items-center border-t border-zinc-700 pt-4" id="acciones-${c.fila}">
-                                ${estadoTexto}
-                                <button onclick="editarCliente(${c.fila})" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-xl shadow-md transition-all">✏️ Editar</button>
-                            </div>
-                        </div>
-                    `;
-                });
+            try {
+                let res = await fetch(`${WEB_APP_URL}?action=get`);
+                let lista = await res.json();
+                resultadosGlobales = lista; 
+                
+                // Filtramos para ignorar filas en blanco si las hay
+                let resultados = lista.filter(item => item.nombre && item.nombre.trim() !== "");
+                renderizarListaClientes(resultados, contenedor);
             } catch (error) {
                 contenedor.innerHTML = "<p class='text-red-500 text-lg text-center'>Error al consultar Google Sheets.</p>";
             }
