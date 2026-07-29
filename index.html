@@ -178,7 +178,14 @@
                     <input type="text" id="nombre-cliente" required placeholder="Nombre completo" class="w-full p-3.5 text-base bg-zinc-900 border border-zinc-700 rounded-xl text-white focus:border-amber-500 focus:outline-none">
                 </div>
 
+                <!-- Aquí se inyectan los bloques creados por el admin -->
                 <div id="campos-dinamicos-inyectados" class="space-y-5 grid grid-cols-1 gap-2 mt-4"></div>
+
+                <!-- NUEVO CAMPO: FECHA DE ENTREGA (Penúltimo) -->
+                <div class="mt-4">
+                    <label class="block text-sm font-bold text-blue-400 uppercase mb-2">📅 Fecha de Entrega *</label>
+                    <input type="date" id="fecha-entrega" required class="w-full p-3.5 text-base bg-zinc-900 border border-blue-600/50 rounded-xl text-white focus:border-blue-400 focus:outline-none">
+                </div>
 
                 <!-- BLOQUE DE CÁMARA EN VIVO -->
                 <div class="mt-4 p-5 bg-zinc-900 border border-zinc-800 rounded-xl shadow-inner">
@@ -228,11 +235,30 @@
         let resultadosGlobales = []; 
         let filaEditando = null;
 
+        // INICIALIZACIÓN DE LA APP (Login persistente e historial)
+        window.addEventListener('DOMContentLoaded', () => {
+            const logueado = localStorage.getItem('sastreria_logueado');
+            if (logueado === 'true') {
+                cambiarSeccion('menu-principal', false);
+                history.replaceState({ seccion: 'menu-principal' }, "", "");
+            } else {
+                history.replaceState({ seccion: 'sec-login' }, "", "");
+            }
+        });
+
+        // ESCUCHAR BOTÓN DE ATRÁS DEL CELULAR
+        window.addEventListener('popstate', (e) => {
+            if (e.state && e.state.seccion) {
+                cambiarSeccion(e.state.seccion, false);
+            }
+        });
+
         function iniciarSesion(e) {
             e.preventDefault();
             const user = document.getElementById('login-user').value;
             const pass = document.getElementById('login-pass').value;
             if(user === "admin" && pass === "1234") {
+                localStorage.setItem('sastreria_logueado', 'true');
                 cambiarSeccion('menu-principal');
                 document.getElementById('login-error').classList.add('hidden');
             } else {
@@ -241,23 +267,29 @@
         }
 
         function cerrarSesion() {
+            localStorage.removeItem('sastreria_logueado');
             document.getElementById('login-user').value = '';
             document.getElementById('login-pass').value = '';
             cambiarSeccion('sec-login');
         }
 
-        function cambiarSeccion(idSeccion) {
+        function cambiarSeccion(idSeccion, pushHistory = true) {
             apagarCamara();
             ['sec-login', 'menu-principal', 'sec-buscar', 'sec-hombre', 'sec-mujer', 'sec-formulario', 'sec-admin'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
             });
             document.getElementById(idSeccion).classList.remove('hidden');
+            
             if(idSeccion === 'sec-admin') renderListaCamposAdmin();
             
-            // Limpiar buscador al salir de esa sección
             if(idSeccion !== 'sec-buscar') {
                 document.getElementById('input-buscar').value = '';
                 document.getElementById('resultados-busqueda').innerHTML = '';
+            }
+
+            // Agrega al historial nativo del teléfono
+            if (pushHistory) {
+                history.pushState({ seccion: idSeccion }, "", "");
             }
         }
 
@@ -425,6 +457,7 @@
             document.getElementById('form-prenda').value = prenda;
             document.getElementById('form-titulo').innerText = `✏️ ${prenda.toUpperCase()} (${genero.toUpperCase()})`;
             document.getElementById('form-medidas').reset();
+            document.getElementById('fecha-entrega').value = '';
             
             apagarCamara();
             document.getElementById('btn-abrir-camara').classList.remove('hidden');
@@ -447,9 +480,6 @@
 
             camposParaEstaPrenda.forEach(campo => {
                 let htmlCampo = '';
-                
-                // Se agregó la propiedad "required" a los input y select.
-                // Se agregó 'step="any"' a los input de tipo número para permitir decimales.
                 
                 if (campo.tipo === 'select') {
                     let opcionesHTML = '<option value="">Selecciona una opción...</option>';
@@ -494,6 +524,7 @@
             let datos = {
                 action: filaEditando ? "edit" : "add",
                 fecha: new Date().toLocaleDateString(),
+                fecha_entrega: document.getElementById('fecha-entrega').value,
                 genero: genero,
                 prenda: prenda,
                 nombre: document.getElementById('nombre-cliente').value
@@ -522,18 +553,17 @@
             }
         }
 
-        // Función reutilizable para renderizar tarjetas de clientes
         function renderizarListaClientes(resultados, contenedor) {
             if (resultados.length === 0) {
                 contenedor.innerHTML = "<p class='text-gray-400 text-lg text-center'>No hay clientes que mostrar.</p>"; return;
             }
 
             contenedor.innerHTML = "";
-            // Invertimos la lista para que el último registro se muestre arriba
             resultados.slice().reverse().forEach(c => {
                 let detallesHTML = ""; let imagenHTML = "";
                 for (let key in c) {
-                    if (['fecha', 'genero', 'prenda', 'nombre', 'action', 'fila', 'estado'].includes(key)) continue;
+                    // Evitamos mostrar datos internos o ya colocados en el encabezado
+                    if (['fecha', 'genero', 'prenda', 'nombre', 'action', 'fila', 'estado', 'fecha_entrega'].includes(key)) continue;
                     if (c[key] !== "") { 
                         if (key === 'foto_referencia' && c[key].startsWith('data:image')) {
                             imagenHTML = `<div class="mt-3"><p class="text-xs text-amber-500 uppercase font-bold mb-1">Foto:</p><img src="${c[key]}" class="h-32 rounded-lg object-cover border border-zinc-700"></div>`;
@@ -548,17 +578,20 @@
                     : `<button id="btn-entregar-${c.fila}" onclick="marcarEntregado(${c.fila})" class="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded-xl shadow-md transition-all">📦 Entregar</button>`;
 
                 let bordeTarjeta = c.estado === 'Entregado' ? 'border-red-500' : 'border-amber-500';
+                
+                // Formateamos la fecha de entrega visualmente (si existe en la base de datos)
+                let textoFechaEntrega = c.fecha_entrega ? `<p class="text-sm text-blue-400 font-bold mb-2">📅 Entrega: ${c.fecha_entrega}</p>` : '';
 
                 contenedor.innerHTML += `
                     <div class="p-4 bg-zinc-800 rounded-xl border-l-4 ${bordeTarjeta} space-y-2 shadow-md transition-all">
                         <strong class="text-white text-lg">${c.nombre}</strong> 
                         <span class="text-sm text-amber-500 font-bold ml-2">(${c.genero} - ${c.prenda})</span>
-                        <p class="text-xs text-gray-500 mb-2">${c.fecha || ''}</p>
+                        <p class="text-xs text-gray-500 mb-1">Registro: ${c.fecha || ''}</p>
+                        ${textoFechaEntrega}
                         <div class="mt-2 leading-relaxed bg-zinc-900 p-3 rounded-lg border border-zinc-700">
                             ${detallesHTML} ${imagenHTML}
                         </div>
                         
-                        <!-- SECCIÓN DE BOTONES -->
                         <div class="mt-4 flex justify-between items-center border-t border-zinc-700 pt-4" id="acciones-${c.fila}">
                             ${estadoTexto}
                             <button onclick="editarCliente(${c.fila})" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-xl shadow-md transition-all">✏️ Editar</button>
@@ -587,10 +620,9 @@
             }
         }
 
-        // Nueva función: Mostrar a todos los clientes registrados
         async function mostrarTodos() {
             cambiarSeccion('sec-buscar');
-            document.getElementById('input-buscar').value = ''; // Limpiamos la barra
+            document.getElementById('input-buscar').value = ''; 
             const contenedor = document.getElementById('resultados-busqueda');
             contenedor.innerHTML = "<p class='text-amber-500 text-lg animate-pulse text-center'>Cargando todos los registros...</p>";
 
@@ -599,7 +631,6 @@
                 let lista = await res.json();
                 resultadosGlobales = lista; 
                 
-                // Filtramos para ignorar filas en blanco si las hay
                 let resultados = lista.filter(item => item.nombre && item.nombre.trim() !== "");
                 renderizarListaClientes(resultados, contenedor);
             } catch (error) {
@@ -642,6 +673,7 @@
             setTimeout(() => {
                 document.getElementById('form-titulo').innerText = `✏️ EDITANDO: ${cliente.nombre.toUpperCase()}`;
                 document.getElementById('nombre-cliente').value = cliente.nombre;
+                if(cliente.fecha_entrega) document.getElementById('fecha-entrega').value = cliente.fecha_entrega;
                 
                 if(cliente.foto_referencia) {
                     document.getElementById('vista-previa-foto').src = cliente.foto_referencia;
