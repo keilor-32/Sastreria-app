@@ -42,18 +42,24 @@
                 <button onclick="cerrarSesion()" class="text-sm text-gray-400 hover:text-red-400">🚪 Salir</button>
             </div>
             
-            <button onclick="mostrarTodos()" class="w-full py-5 text-lg bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl shadow-lg transition-all transform hover:-translate-y-1">
-                📋 Mostrar Todos los Clientes
+            <button onclick="mostrarPendientes()" class="w-full py-5 text-lg bg-green-600 hover:bg-green-500 text-white font-bold rounded-2xl shadow-lg transition-all transform hover:-translate-y-1">
+                🟢 Mostrar Solo Pendientes
             </button>
-            <button onclick="cambiarSeccion('sec-buscar')" class="w-full py-5 text-lg bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-2xl shadow-lg transition-all transform hover:-translate-y-1">
+            <button onclick="mostrarTodos()" class="w-full py-4 text-lg bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl shadow-lg transition-all transform hover:-translate-y-1">
+                📋 Mostrar Todos los Registros
+            </button>
+            <button onclick="cambiarSeccion('sec-buscar')" class="w-full py-4 text-lg bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-2xl shadow-lg transition-all transform hover:-translate-y-1">
                 🔍 Buscar Cliente Específico
             </button>
-            <button onclick="cambiarSeccion('sec-hombre')" class="w-full py-5 text-lg bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-2xl border border-zinc-700 shadow-lg transition-all transform hover:-translate-y-1">
-                👨 Registrar Cliente Hombre
-            </button>
-            <button onclick="cambiarSeccion('sec-mujer')" class="w-full py-5 text-lg bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-2xl border border-zinc-700 shadow-lg transition-all transform hover:-translate-y-1">
-                👩 Registrar Cliente Mujer
-            </button>
+
+            <div class="grid grid-cols-2 gap-3 mt-2">
+                <button onclick="cambiarSeccion('sec-hombre')" class="w-full py-4 text-sm bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-2xl border border-zinc-700 shadow-lg transition-all">
+                    👨 Reg. Hombre
+                </button>
+                <button onclick="cambiarSeccion('sec-mujer')" class="w-full py-4 text-sm bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-2xl border border-zinc-700 shadow-lg transition-all">
+                    👩 Reg. Mujer
+                </button>
+            </div>
             
             <hr class="border-zinc-800 my-2">
             
@@ -161,7 +167,7 @@
             <h2 class="text-2xl font-bold text-center text-amber-500">🔍 Buscar Cliente</h2>
             <input type="text" id="input-buscar" placeholder="Escribe el nombre..." class="w-full p-4 text-base md:text-lg bg-zinc-900 border border-zinc-700 rounded-xl focus:border-amber-500 text-white focus:outline-none">
             <button onclick="buscarCliente()" class="w-full py-4 text-lg bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl shadow-md">Buscar</button>
-            <div id="resultados-busqueda" class="mt-4 p-4 bg-zinc-900 rounded-xl border border-zinc-800 max-h-96 overflow-y-auto space-y-3"></div>
+            <div id="resultados-busqueda" class="mt-4 p-4 bg-zinc-900 rounded-xl border border-zinc-800 max-h-96 overflow-y-auto space-y-4"></div>
             <button onclick="regresarMenu()" class="text-base text-gray-400 hover:text-white underline text-center mt-4">← Volver</button>
         </div>
 
@@ -178,10 +184,29 @@
                     <input type="text" id="nombre-cliente" required placeholder="Nombre completo" class="w-full p-3.5 text-base bg-zinc-900 border border-zinc-700 rounded-xl text-white focus:border-amber-500 focus:outline-none">
                 </div>
 
-                <!-- Aquí se inyectan los bloques creados por el admin -->
+                <!-- BLOQUES CREADOS POR EL ADMIN -->
                 <div id="campos-dinamicos-inyectados" class="space-y-5 grid grid-cols-1 gap-2 mt-4"></div>
 
-                <!-- NUEVO CAMPO: FECHA DE ENTREGA (Penúltimo) -->
+                <!-- SECCIÓN FINANCIERA -->
+                <div class="mt-4 p-4 bg-zinc-900 border border-zinc-700 rounded-xl">
+                    <h3 class="text-sm font-bold text-amber-500 uppercase mb-3">💰 Detalles de Pago</h3>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-[10px] md:text-xs font-bold text-gray-300 uppercase mb-1">A cuenta</label>
+                            <input type="number" step="any" id="pago-acuenta" required class="w-full p-2 text-base bg-zinc-950 border border-zinc-700 rounded-lg text-white focus:border-amber-500 focus:outline-none text-center">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] md:text-xs font-bold text-gray-300 uppercase mb-1">Saldo</label>
+                            <input type="number" step="any" id="pago-saldo" required class="w-full p-2 text-base bg-zinc-950 border border-zinc-700 rounded-lg text-white focus:border-amber-500 focus:outline-none text-center">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] md:text-xs font-bold text-gray-300 uppercase mb-1">Total</label>
+                            <input type="number" step="any" id="pago-total" required class="w-full p-2 text-base bg-zinc-950 border border-zinc-700 rounded-lg text-white focus:border-amber-500 focus:outline-none text-center">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FECHA DE ENTREGA -->
                 <div class="mt-4">
                     <label class="block text-sm font-bold text-blue-400 uppercase mb-2">📅 Fecha de Entrega *</label>
                     <input type="date" id="fecha-entrega" required class="w-full p-3.5 text-base bg-zinc-900 border border-blue-600/50 rounded-xl text-white focus:border-blue-400 focus:outline-none">
@@ -246,12 +271,31 @@
             }
         });
 
-        // ESCUCHAR BOTÓN DE ATRÁS DEL CELULAR
         window.addEventListener('popstate', (e) => {
             if (e.state && e.state.seccion) {
                 cambiarSeccion(e.state.seccion, false);
             }
         });
+
+        // FUNCIONES DE FORMATEO (Convertir "2026-03-16" a "16 de marzo")
+        function formatearFechaTexto(fechaStr) {
+            if (!fechaStr) return '';
+            const meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+            
+            try {
+                if (fechaStr.includes('-')) {
+                    const partes = fechaStr.split('T')[0].split('-');
+                    return `${parseInt(partes[2], 10)} de ${meses[parseInt(partes[1], 10) - 1]}`;
+                } else if (fechaStr.includes('/')) {
+                    const partes = fechaStr.split('/');
+                    return `${parseInt(partes[0], 10)} de ${meses[parseInt(partes[1], 10) - 1]}`;
+                }
+                const f = new Date(fechaStr);
+                return `${f.getDate()} de ${meses[f.getMonth()]}`;
+            } catch (e) {
+                return fechaStr;
+            }
+        }
 
         function iniciarSesion(e) {
             e.preventDefault();
@@ -287,7 +331,6 @@
                 document.getElementById('resultados-busqueda').innerHTML = '';
             }
 
-            // Agrega al historial nativo del teléfono
             if (pushHistory) {
                 history.pushState({ seccion: idSeccion }, "", "");
             }
@@ -355,12 +398,9 @@
                 return;
             }
 
-            let elementosMostrados = 0;
-
             camposPersonalizados.forEach((campo, index) => {
                 if (filtroActual !== 'Todos' && campo.destino !== filtroActual && campo.destino !== 'Todos') return; 
                 
-                elementosMostrados++;
                 let etiquetaTipo = campo.tipo === 'select' ? 'Lista' : (campo.tipo === 'number' ? 'Núm.' : 'Texto');
                 let badgeDestino = campo.destino === 'Todos' ? 'Global' : campo.destino.replace('-', ' ');
 
@@ -380,10 +420,6 @@
                         </div>
                     </div>`;
             });
-
-            if (elementosMostrados === 0) {
-                lista.innerHTML = `<p class="text-gray-500 text-sm text-center italic">No hay bloques creados para la categoría "${filtroActual}".</p>`;
-            }
         }
 
         function eliminarCampo(index) {
@@ -456,8 +492,13 @@
             document.getElementById('form-genero').value = genero;
             document.getElementById('form-prenda').value = prenda;
             document.getElementById('form-titulo').innerText = `✏️ ${prenda.toUpperCase()} (${genero.toUpperCase()})`;
+            
+            // Limpiar datos
             document.getElementById('form-medidas').reset();
             document.getElementById('fecha-entrega').value = '';
+            document.getElementById('pago-acuenta').value = '';
+            document.getElementById('pago-saldo').value = '';
+            document.getElementById('pago-total').value = '';
             
             apagarCamara();
             document.getElementById('btn-abrir-camara').classList.remove('hidden');
@@ -480,7 +521,6 @@
 
             camposParaEstaPrenda.forEach(campo => {
                 let htmlCampo = '';
-                
                 if (campo.tipo === 'select') {
                     let opcionesHTML = '<option value="">Selecciona una opción...</option>';
                     campo.opciones.split(',').forEach(opc => {
@@ -525,6 +565,9 @@
                 action: filaEditando ? "edit" : "add",
                 fecha: new Date().toLocaleDateString(),
                 fecha_entrega: document.getElementById('fecha-entrega').value,
+                acuenta: document.getElementById('pago-acuenta').value,
+                saldo: document.getElementById('pago-saldo').value,
+                total: document.getElementById('pago-total').value,
                 genero: genero,
                 prenda: prenda,
                 nombre: document.getElementById('nombre-cliente').value
@@ -553,6 +596,7 @@
             }
         }
 
+        // FUNCIÓN PRINCIPAL DE RENDERIZAR LISTAS
         function renderizarListaClientes(resultados, contenedor) {
             if (resultados.length === 0) {
                 contenedor.innerHTML = "<p class='text-gray-400 text-lg text-center'>No hay clientes que mostrar.</p>"; return;
@@ -562,8 +606,7 @@
             resultados.slice().reverse().forEach(c => {
                 let detallesHTML = ""; let imagenHTML = "";
                 for (let key in c) {
-                    // Evitamos mostrar datos internos o ya colocados en el encabezado
-                    if (['fecha', 'genero', 'prenda', 'nombre', 'action', 'fila', 'estado', 'fecha_entrega'].includes(key)) continue;
+                    if (['fecha', 'genero', 'prenda', 'nombre', 'action', 'fila', 'estado', 'fecha_entrega', 'acuenta', 'saldo', 'total'].includes(key)) continue;
                     if (c[key] !== "") { 
                         if (key === 'foto_referencia' && c[key].startsWith('data:image')) {
                             imagenHTML = `<div class="mt-3"><p class="text-xs text-amber-500 uppercase font-bold mb-1">Foto:</p><img src="${c[key]}" class="h-32 rounded-lg object-cover border border-zinc-700"></div>`;
@@ -573,29 +616,69 @@
                     }
                 }
 
-                let estadoTexto = c.estado === 'Entregado' 
-                    ? `<span class="text-red-500 font-extrabold text-lg tracking-wider">ENTREGADO</span>`
-                    : `<button id="btn-entregar-${c.fila}" onclick="marcarEntregado(${c.fila})" class="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded-xl shadow-md transition-all">📦 Entregar</button>`;
-
-                let bordeTarjeta = c.estado === 'Entregado' ? 'border-red-500' : 'border-amber-500';
+                let esEntregado = c.estado === 'Entregado';
+                let nombreEstado = c.estado || 'Pendiente';
                 
-                // Formateamos la fecha de entrega visualmente (si existe en la base de datos)
-                let textoFechaEntrega = c.fecha_entrega ? `<p class="text-sm text-blue-400 font-bold mb-2">📅 Entrega: ${c.fecha_entrega}</p>` : '';
+                // Color de la etiqueta según el estado
+                let colorBadge = "bg-zinc-700 text-gray-300";
+                if(nombreEstado === 'Entregado') colorBadge = "bg-red-500/20 text-red-500";
+                if(nombreEstado === 'Comprado') colorBadge = "bg-purple-600/30 text-purple-400";
+                if(nombreEstado === 'Cortado') colorBadge = "bg-indigo-600/30 text-indigo-400";
+
+                let estadoBadge = `<span id="badge-estado-${c.fila}" class="px-2 py-1 text-[10px] rounded ${colorBadge} uppercase font-bold tracking-widest">${nombreEstado}</span>`;
+
+                // Fila Principal de Botones
+                let estadoTexto = esEntregado 
+                    ? `<span class="text-red-500 font-extrabold text-lg tracking-wider w-full text-center" id="txt-entregado-${c.fila}">ENTREGADO</span>`
+                    : `<button id="btn-entregar-${c.fila}" onclick="cambiarEstado(${c.fila}, 'Entregado', event)" class="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded-xl shadow-md transition-all flex-1 mr-2 text-center">📦 Entregar</button>`;
+
+                let bordeTarjeta = esEntregado ? 'border-red-500' : 'border-amber-500';
+                
+                let textoFechaEntrega = c.fecha_entrega ? `<p class="text-sm text-blue-400 font-bold mb-2">📅 Entrega: ${formatearFechaTexto(c.fecha_entrega)}</p>` : '';
+
+                // Formato Financiero (Horizontal)
+                let finanzasHTML = "";
+                if (c.acuenta || c.saldo || c.total) {
+                    finanzasHTML = `
+                        <div class="mt-3 bg-zinc-950 p-2 rounded-lg border border-zinc-700 grid grid-cols-3 gap-2 text-center divide-x divide-zinc-700">
+                            <div><p class="text-[10px] text-gray-500 uppercase font-bold">A cuenta</p><p class="text-sm text-amber-500 font-bold">${c.acuenta || '0'}</p></div>
+                            <div><p class="text-[10px] text-gray-500 uppercase font-bold">Saldo</p><p class="text-sm text-red-400 font-bold">${c.saldo || '0'}</p></div>
+                            <div><p class="text-[10px] text-gray-500 uppercase font-bold">Total</p><p class="text-sm text-green-400 font-bold">${c.total || '0'}</p></div>
+                        </div>
+                    `;
+                }
+
+                // Botones extra debajo
+                let subEstados = esEntregado ? '' : `
+                    <div class="mt-2 flex gap-2 w-full" id="subestados-${c.fila}">
+                        <button onclick="cambiarEstado(${c.fila}, 'Comprado', event)" class="flex-1 bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded-xl shadow-md text-xs transition-all">🛍️ Comprado</button>
+                        <button onclick="cambiarEstado(${c.fila}, 'Cortado', event)" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl shadow-md text-xs transition-all">✂️ Cortado</button>
+                    </div>
+                `;
 
                 contenedor.innerHTML += `
-                    <div class="p-4 bg-zinc-800 rounded-xl border-l-4 ${bordeTarjeta} space-y-2 shadow-md transition-all">
-                        <strong class="text-white text-lg">${c.nombre}</strong> 
-                        <span class="text-sm text-amber-500 font-bold ml-2">(${c.genero} - ${c.prenda})</span>
-                        <p class="text-xs text-gray-500 mb-1">Registro: ${c.fecha || ''}</p>
+                    <div class="p-4 bg-zinc-800 rounded-xl border-l-4 ${bordeTarjeta} space-y-2 shadow-md transition-all" id="tarjeta-${c.fila}">
+                        <div class="flex justify-between items-start">
+                            <div class="pr-2">
+                                <strong class="text-white text-lg">${c.nombre}</strong> 
+                                <span class="text-sm text-amber-500 font-bold ml-1">(${c.genero} - ${c.prenda})</span>
+                            </div>
+                            ${estadoBadge}
+                        </div>
+                        <p class="text-xs text-gray-500 mb-1">Registro: ${formatearFechaTexto(c.fecha)}</p>
                         ${textoFechaEntrega}
+                        
+                        ${finanzasHTML}
+
                         <div class="mt-2 leading-relaxed bg-zinc-900 p-3 rounded-lg border border-zinc-700">
                             ${detallesHTML} ${imagenHTML}
                         </div>
                         
                         <div class="mt-4 flex justify-between items-center border-t border-zinc-700 pt-4" id="acciones-${c.fila}">
                             ${estadoTexto}
-                            <button onclick="editarCliente(${c.fila})" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-xl shadow-md transition-all">✏️ Editar</button>
+                            <button onclick="editarCliente(${c.fila})" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-xl shadow-md transition-all text-center ml-2">✏️ Editar</button>
                         </div>
+                        ${subEstados}
                     </div>
                 `;
             });
@@ -612,7 +695,6 @@
                 let res = await fetch(`${WEB_APP_URL}?action=get`);
                 let lista = await res.json();
                 resultadosGlobales = lista; 
-                
                 let resultados = lista.filter(item => item.nombre && item.nombre.toLowerCase().includes(query));
                 renderizarListaClientes(resultados, contenedor);
             } catch (error) {
@@ -630,7 +712,6 @@
                 let res = await fetch(`${WEB_APP_URL}?action=get`);
                 let lista = await res.json();
                 resultadosGlobales = lista; 
-                
                 let resultados = lista.filter(item => item.nombre && item.nombre.trim() !== "");
                 renderizarListaClientes(resultados, contenedor);
             } catch (error) {
@@ -638,27 +719,71 @@
             }
         }
 
-        async function marcarEntregado(fila) {
-            if(!confirm("¿Seguro que deseas marcar esta prenda como Entregada?")) return;
+        async function mostrarPendientes() {
+            cambiarSeccion('sec-buscar');
+            document.getElementById('input-buscar').value = ''; 
+            const contenedor = document.getElementById('resultados-busqueda');
+            contenedor.innerHTML = "<p class='text-green-500 text-lg animate-pulse text-center'>Cargando trabajos pendientes...</p>";
+
+            try {
+                let res = await fetch(`${WEB_APP_URL}?action=get`);
+                let lista = await res.json();
+                resultadosGlobales = lista; 
+                // Filtra a todos los que NO digan "Entregado"
+                let resultados = lista.filter(item => item.nombre && item.nombre.trim() !== "" && item.estado !== 'Entregado');
+                renderizarListaClientes(resultados, contenedor);
+            } catch (error) {
+                contenedor.innerHTML = "<p class='text-red-500 text-lg text-center'>Error al consultar Google Sheets.</p>";
+            }
+        }
+
+        // FUNCION UNIVERSAL PARA CAMBIAR ESTADOS
+        async function cambiarEstado(fila, nuevoEstado, event) {
+            if (nuevoEstado === 'Entregado') {
+                if(!confirm("¿Seguro que deseas marcar esta prenda como Entregada?")) return;
+            }
             
-            const btn = document.getElementById(`btn-entregar-${fila}`);
-            btn.innerHTML = "⌛ Procesando...";
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "⌛...";
             btn.disabled = true;
 
             try {
                 await fetch(WEB_APP_URL, {
                     method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ action: "entregar", fila: fila })
+                    body: JSON.stringify({ action: "edit", fila: fila, estado: nuevoEstado })
                 });
                 
-                const accionesDiv = document.getElementById(`acciones-${fila}`);
-                accionesDiv.parentElement.classList.remove('border-amber-500');
-                accionesDiv.parentElement.classList.add('border-red-500'); 
-                btn.outerHTML = `<span class="text-red-500 font-extrabold text-lg tracking-wider">ENTREGADO</span>`;
-                
+                // Actualización visual instántanea
+                const badge = document.getElementById(`badge-estado-${fila}`);
+                if (badge) {
+                    badge.innerText = nuevoEstado;
+                    badge.className = `px-2 py-1 text-[10px] rounded uppercase font-bold tracking-widest ${
+                        nuevoEstado === 'Entregado' ? 'bg-red-500/20 text-red-500' :
+                        nuevoEstado === 'Comprado' ? 'bg-purple-600/30 text-purple-400' :
+                        nuevoEstado === 'Cortado' ? 'bg-indigo-600/30 text-indigo-400' : 'bg-zinc-700 text-gray-300'
+                    }`;
+                }
+
+                if (nuevoEstado === 'Entregado') {
+                    const tarjeta = document.getElementById(`tarjeta-${fila}`);
+                    if (tarjeta) {
+                        tarjeta.classList.remove('border-amber-500');
+                        tarjeta.classList.add('border-red-500');
+                    }
+                    const btnEntregar = document.getElementById(`btn-entregar-${fila}`);
+                    if (btnEntregar) {
+                        btnEntregar.outerHTML = `<span class="text-red-500 font-extrabold text-lg tracking-wider w-full text-center" id="txt-entregado-${fila}">ENTREGADO</span>`;
+                    }
+                    const subestados = document.getElementById(`subestados-${fila}`);
+                    if (subestados) subestados.remove(); // Desaparecen los botones de Comprado/Cortado
+                } else {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
             } catch (error) {
                 alert("Error al actualizar estado.");
-                btn.innerHTML = "📦 Entregar";
+                btn.innerHTML = originalText;
                 btn.disabled = false;
             }
         }
@@ -673,7 +798,11 @@
             setTimeout(() => {
                 document.getElementById('form-titulo').innerText = `✏️ EDITANDO: ${cliente.nombre.toUpperCase()}`;
                 document.getElementById('nombre-cliente').value = cliente.nombre;
+                
                 if(cliente.fecha_entrega) document.getElementById('fecha-entrega').value = cliente.fecha_entrega;
+                if(cliente.acuenta) document.getElementById('pago-acuenta').value = cliente.acuenta;
+                if(cliente.saldo) document.getElementById('pago-saldo').value = cliente.saldo;
+                if(cliente.total) document.getElementById('pago-total').value = cliente.total;
                 
                 if(cliente.foto_referencia) {
                     document.getElementById('vista-previa-foto').src = cliente.foto_referencia;
