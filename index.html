@@ -260,7 +260,6 @@
         let resultadosGlobales = []; 
         let filaEditando = null;
 
-        // INICIALIZACIÓN DE LA APP (Login persistente e historial)
         window.addEventListener('DOMContentLoaded', () => {
             const logueado = localStorage.getItem('sastreria_logueado');
             if (logueado === 'true') {
@@ -277,7 +276,6 @@
             }
         });
 
-        // FUNCIONES DE FORMATEO (Convertir "2026-03-16" a "16 de marzo")
         function formatearFechaTexto(fechaStr) {
             if (!fechaStr) return '';
             const meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
@@ -493,7 +491,6 @@
             document.getElementById('form-prenda').value = prenda;
             document.getElementById('form-titulo').innerText = `✏️ ${prenda.toUpperCase()} (${genero.toUpperCase()})`;
             
-            // Limpiar datos
             document.getElementById('form-medidas').reset();
             document.getElementById('fecha-entrega').value = '';
             document.getElementById('pago-acuenta').value = '';
@@ -596,7 +593,6 @@
             }
         }
 
-        // FUNCIÓN PRINCIPAL DE RENDERIZAR LISTAS
         function renderizarListaClientes(resultados, contenedor) {
             if (resultados.length === 0) {
                 contenedor.innerHTML = "<p class='text-gray-400 text-lg text-center'>No hay clientes que mostrar.</p>"; return;
@@ -619,7 +615,6 @@
                 let esEntregado = c.estado === 'Entregado';
                 let nombreEstado = c.estado || 'Pendiente';
                 
-                // Color de la etiqueta según el estado
                 let colorBadge = "bg-zinc-700 text-gray-300";
                 if(nombreEstado === 'Entregado') colorBadge = "bg-red-500/20 text-red-500";
                 if(nombreEstado === 'Comprado') colorBadge = "bg-purple-600/30 text-purple-400";
@@ -627,16 +622,13 @@
 
                 let estadoBadge = `<span id="badge-estado-${c.fila}" class="px-2 py-1 text-[10px] rounded ${colorBadge} uppercase font-bold tracking-widest">${nombreEstado}</span>`;
 
-                // Fila Principal de Botones
                 let estadoTexto = esEntregado 
                     ? `<span class="text-red-500 font-extrabold text-lg tracking-wider w-full text-center" id="txt-entregado-${c.fila}">ENTREGADO</span>`
                     : `<button id="btn-entregar-${c.fila}" onclick="cambiarEstado(${c.fila}, 'Entregado', event)" class="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded-xl shadow-md transition-all flex-1 mr-2 text-center">📦 Entregar</button>`;
 
                 let bordeTarjeta = esEntregado ? 'border-red-500' : 'border-amber-500';
-                
                 let textoFechaEntrega = c.fecha_entrega ? `<p class="text-sm text-blue-400 font-bold mb-2">📅 Entrega: ${formatearFechaTexto(c.fecha_entrega)}</p>` : '';
 
-                // Formato Financiero (Horizontal)
                 let finanzasHTML = "";
                 if (c.acuenta || c.saldo || c.total) {
                     finanzasHTML = `
@@ -648,11 +640,19 @@
                     `;
                 }
 
-                // Botones extra debajo
+                // Generación de Subestados visuales al cargar (Comprado/Cortado como texto fuerte)
+                let btnCompradoHTML = (nombreEstado === 'Comprado' || nombreEstado === 'Cortado')
+                    ? `<span class="flex-1 text-purple-500 font-extrabold text-base md:text-lg tracking-wider text-center py-2 uppercase">COMPRADO</span>`
+                    : `<button onclick="cambiarEstado(${c.fila}, 'Comprado', event)" class="flex-1 bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded-xl shadow-md text-xs transition-all">🛍️ Comprado</button>`;
+
+                let btnCortadoHTML = (nombreEstado === 'Cortado')
+                    ? `<span class="flex-1 text-indigo-500 font-extrabold text-base md:text-lg tracking-wider text-center py-2 uppercase">CORTADO</span>`
+                    : `<button onclick="cambiarEstado(${c.fila}, 'Cortado', event)" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl shadow-md text-xs transition-all">✂️ Cortado</button>`;
+
                 let subEstados = esEntregado ? '' : `
-                    <div class="mt-2 flex gap-2 w-full" id="subestados-${c.fila}">
-                        <button onclick="cambiarEstado(${c.fila}, 'Comprado', event)" class="flex-1 bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded-xl shadow-md text-xs transition-all">🛍️ Comprado</button>
-                        <button onclick="cambiarEstado(${c.fila}, 'Cortado', event)" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl shadow-md text-xs transition-all">✂️ Cortado</button>
+                    <div class="mt-2 flex gap-2 w-full items-center justify-center" id="subestados-${c.fila}">
+                        ${btnCompradoHTML}
+                        ${btnCortadoHTML}
                     </div>
                 `;
 
@@ -729,7 +729,6 @@
                 let res = await fetch(`${WEB_APP_URL}?action=get`);
                 let lista = await res.json();
                 resultadosGlobales = lista; 
-                // Filtra a todos los que NO digan "Entregado"
                 let resultados = lista.filter(item => item.nombre && item.nombre.trim() !== "" && item.estado !== 'Entregado');
                 renderizarListaClientes(resultados, contenedor);
             } catch (error) {
@@ -737,7 +736,6 @@
             }
         }
 
-        // FUNCION UNIVERSAL PARA CAMBIAR ESTADOS
         async function cambiarEstado(fila, nuevoEstado, event) {
             if (nuevoEstado === 'Entregado') {
                 if(!confirm("¿Seguro que deseas marcar esta prenda como Entregada?")) return;
@@ -754,7 +752,6 @@
                     body: JSON.stringify({ action: "edit", fila: fila, estado: nuevoEstado })
                 });
                 
-                // Actualización visual instántanea
                 const badge = document.getElementById(`badge-estado-${fila}`);
                 if (badge) {
                     badge.innerText = nuevoEstado;
@@ -776,10 +773,22 @@
                         btnEntregar.outerHTML = `<span class="text-red-500 font-extrabold text-lg tracking-wider w-full text-center" id="txt-entregado-${fila}">ENTREGADO</span>`;
                     }
                     const subestados = document.getElementById(`subestados-${fila}`);
-                    if (subestados) subestados.remove(); // Desaparecen los botones de Comprado/Cortado
-                } else {
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
+                    if (subestados) subestados.remove(); 
+                } else if (nuevoEstado === 'Comprado' || nuevoEstado === 'Cortado') {
+                    
+                    if (nuevoEstado === 'Comprado') {
+                        btn.outerHTML = `<span class="flex-1 text-purple-500 font-extrabold text-base md:text-lg tracking-wider text-center py-2 uppercase">COMPRADO</span>`;
+                    } else if (nuevoEstado === 'Cortado') {
+                        btn.outerHTML = `<span class="flex-1 text-indigo-500 font-extrabold text-base md:text-lg tracking-wider text-center py-2 uppercase">CORTADO</span>`;
+                        
+                        const contenedorSub = document.getElementById(`subestados-${fila}`);
+                        if (contenedorSub) {
+                            const btnComp = contenedorSub.querySelector(`button[onclick*="'Comprado'"]`);
+                            if (btnComp) {
+                                btnComp.outerHTML = `<span class="flex-1 text-purple-500 font-extrabold text-base md:text-lg tracking-wider text-center py-2 uppercase">COMPRADO</span>`;
+                            }
+                        }
+                    }
                 }
             } catch (error) {
                 alert("Error al actualizar estado.");
