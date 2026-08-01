@@ -138,26 +138,11 @@
                 </button>
             </div>
 
-            <!-- FILTRO DE ADMINISTRADOR -->
-            <div class="mt-4 p-3 bg-zinc-900 border border-zinc-800 rounded-xl">
-                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Filtrar vista del Administrador:</label>
-                <select id="filtro-admin" onchange="renderListaCamposAdmin()" class="w-full p-2 text-sm bg-zinc-950 border border-zinc-700 rounded-lg text-amber-500 focus:outline-none">
-                    <option value="Todos">Ver todos los bloques mezclados</option>
-                    <option value="Hombre-Pantalón">Solo Hombre - Pantalón</option>
-                    <option value="Hombre-Saco">Solo Hombre - Saco</option>
-                    <option value="Hombre-Chaleco">Solo Hombre - Chaleco</option>
-                    <option value="Mujer-Pantalón">Solo Mujer - Pantalón</option>
-                    <option value="Mujer-Falda">Solo Mujer - Falda</option>
-                    <option value="Mujer-Saco">Solo Mujer - Saco</option>
-                    <option value="Mujer-Chaleco">Solo Mujer - Chaleco</option>
-                </select>
-            </div>
-
-            <h3 class="text-lg font-bold text-gray-200 mt-2 flex justify-between">
+            <h3 class="text-lg font-bold text-gray-200 mt-4 flex justify-between border-t border-zinc-800 pt-4">
                 <span>Bloques Creados:</span>
                 <span class="text-sm text-gray-500 font-normal">Ordena con ⬆️ ⬇️</span>
             </h3>
-            <div id="lista-campos-dinamicos" class="space-y-3 max-h-64 overflow-y-auto pr-2"></div>
+            <div id="lista-campos-dinamicos" class="space-y-3 max-h-64 overflow-y-auto pr-2 mt-3"></div>
 
             <button onclick="regresarMenu()" class="text-base text-gray-400 hover:text-white underline text-center mt-4">← Volver al Menú</button>
         </div>
@@ -184,7 +169,6 @@
                     <input type="text" id="nombre-cliente" required placeholder="Nombre completo" class="w-full p-3.5 text-base bg-zinc-900 border border-zinc-700 rounded-xl text-white focus:border-amber-500 focus:outline-none">
                 </div>
 
-                <!-- BLOQUES CREADOS POR EL ADMIN -->
                 <div id="campos-dinamicos-inyectados" class="space-y-5 grid grid-cols-1 gap-2 mt-4"></div>
 
                 <!-- SECCIÓN FINANCIERA -->
@@ -237,7 +221,7 @@
                     <input type="hidden" id="foto-base64">
                 </div>
 
-                <button type="submit" class="w-full py-4 text-lg bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl shadow-[0_0_15px_rgba(217,119,6,0.4)] transition-all">
+                <button type="submit" id="btn-guardar-datos" class="w-full py-4 text-lg bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl shadow-[0_0_15px_rgba(217,119,6,0.4)] transition-all">
                     💾 Guardar Datos
                 </button>
             </form>
@@ -265,10 +249,18 @@
             if (logueado === 'true') {
                 cambiarSeccion('menu-principal', false);
                 history.replaceState({ seccion: 'menu-principal' }, "", "");
+                cargarClientesSilencioso();
             } else {
                 history.replaceState({ seccion: 'sec-login' }, "", "");
             }
         });
+
+        function cargarClientesSilencioso() {
+            fetch(`${WEB_APP_URL}?action=get`)
+                .then(res => res.json())
+                .then(lista => { resultadosGlobales = lista; })
+                .catch(e => console.log("Carga silenciosa falló", e));
+        }
 
         window.addEventListener('popstate', (e) => {
             if (e.state && e.state.seccion) {
@@ -303,6 +295,7 @@
                 localStorage.setItem('sastreria_logueado', 'true');
                 cambiarSeccion('menu-principal');
                 document.getElementById('login-error').classList.add('hidden');
+                cargarClientesSilencioso();
             } else {
                 document.getElementById('login-error').classList.remove('hidden');
             }
@@ -388,7 +381,6 @@
 
         function renderListaCamposAdmin() {
             const lista = document.getElementById('lista-campos-dinamicos');
-            const filtroActual = document.getElementById('filtro-admin').value;
             lista.innerHTML = '';
             
             if(camposPersonalizados.length === 0) {
@@ -397,8 +389,6 @@
             }
 
             camposPersonalizados.forEach((campo, index) => {
-                if (filtroActual !== 'Todos' && campo.destino !== filtroActual && campo.destino !== 'Todos') return; 
-                
                 let etiquetaTipo = campo.tipo === 'select' ? 'Lista' : (campo.tipo === 'number' ? 'Núm.' : 'Texto');
                 let badgeDestino = campo.destino === 'Todos' ? 'Global' : campo.destino.replace('-', ' ');
 
@@ -442,7 +432,6 @@
                 document.getElementById('contenedor-camara').classList.add('flex');
             } catch (error) {
                 alert("No se pudo acceder a la cámara. Asegúrate de dar permisos a tu navegador.");
-                console.error("Error cámara:", error);
             }
         }
 
@@ -492,10 +481,6 @@
             document.getElementById('form-titulo').innerText = `✏️ ${prenda.toUpperCase()} (${genero.toUpperCase()})`;
             
             document.getElementById('form-medidas').reset();
-            document.getElementById('fecha-entrega').value = '';
-            document.getElementById('pago-acuenta').value = '';
-            document.getElementById('pago-saldo').value = '';
-            document.getElementById('pago-total').value = '';
             
             apagarCamara();
             document.getElementById('btn-abrir-camara').classList.remove('hidden');
@@ -549,11 +534,47 @@
         async function guardarDatos(e) {
             e.preventDefault();
 
+            const btnSubmit = document.getElementById('btn-guardar-datos');
+            const originalBtnText = btnSubmit.innerHTML;
+            btnSubmit.innerHTML = "⌛ Procesando...";
+            btnSubmit.disabled = true;
+
             const codigoIngresado = prompt("🔒 Ingrese el código de seguridad (1234b):");
             if (codigoIngresado !== "1234b") {
-                alert("❌ Código incorrecto."); return;
+                alert("❌ Código incorrecto."); 
+                btnSubmit.innerHTML = originalBtnText;
+                btnSubmit.disabled = false;
+                return;
             }
             
+            const nombreInput = document.getElementById('nombre-cliente').value.trim();
+
+            // CONTROL DE DUPLICADOS EN TIEMPO REAL
+            if (!filaEditando) {
+                document.getElementById('form-titulo').innerText = "⌛ Verificando...";
+                try {
+                    let res = await fetch(`${WEB_APP_URL}?action=get`);
+                    resultadosGlobales = await res.json();
+                } catch(err) {}
+                
+                const generoSeleccionado = document.getElementById('form-genero').value;
+                const prendaSeleccionada = document.getElementById('form-prenda').value;
+                document.getElementById('form-titulo').innerText = `📝 ${prendaSeleccionada.toUpperCase()} (${generoSeleccionado.toUpperCase()})`;
+
+                const existe = resultadosGlobales.find(c => c.nombre && c.nombre.trim().toLowerCase() === nombreInput.toLowerCase());
+                if (existe) {
+                    const irAlPerfil = confirm(`⚠️ EL CLIENTE YA ESTÁ REGISTRADO: "${existe.nombre}"\n\n¿Deseas ir a los usuarios registrados para crearle un nuevo pedido reciclando sus medidas?\n\n(Aceptar = Ir al cliente | Cancelar = Ignorar y registrar de todos modos)`);
+                    if (irAlPerfil) {
+                        cambiarSeccion('sec-buscar');
+                        document.getElementById('input-buscar').value = existe.nombre;
+                        buscarCliente();
+                        btnSubmit.innerHTML = originalBtnText;
+                        btnSubmit.disabled = false;
+                        return; // Se detiene aquí, no guarda el duplicado.
+                    }
+                }
+            }
+
             const genero = document.getElementById('form-genero').value;
             const prenda = document.getElementById('form-prenda').value;
             const identificadorActual = `${genero}-${prenda}`;
@@ -567,10 +588,24 @@
                 total: document.getElementById('pago-total').value,
                 genero: genero,
                 prenda: prenda,
-                nombre: document.getElementById('nombre-cliente').value
+                nombre: nombreInput
             };
             
-            if (filaEditando) datos.fila = filaEditando;
+            // REINICIO DE ESTADO DE 'ENTREGADO' A 'PENDIENTE'
+            let mostroMensajeReinicio = false;
+            if (filaEditando) {
+                datos.fila = filaEditando;
+                const clienteViejo = resultadosGlobales.find(c => c.fila === filaEditando);
+                if (clienteViejo && clienteViejo.estado === 'Entregado') {
+                    datos.estado = 'Pendiente';
+                    datos.anotacion_proceso = ''; // Borramos cualquier estado antiguo
+                    mostroMensajeReinicio = true;
+                    
+                    // Actualizamos memoria para que funcione inmediatamente al buscar
+                    clienteViejo.estado = 'Pendiente';
+                    clienteViejo.anotacion_proceso = '';
+                }
+            }
 
             const camposParaEstaPrenda = camposPersonalizados.filter(c => c.destino === 'Todos' || c.destino === identificadorActual);
             camposParaEstaPrenda.forEach(campo => {
@@ -586,10 +621,21 @@
                     method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(datos)
                 });
-                alert(filaEditando ? "✅ ¡Datos editados correctamente!" : "✅ ¡Datos guardados en Google Sheets!");
+                
+                if (mostroMensajeReinicio) {
+                    alert("✅ ¡Datos guardados exitosamente!\n\nAl modificar un pedido antiguo, su estado se ha reiniciado a PENDIENTE como si fuera un trabajo nuevo. El botón de Entregar volverá a aparecer.");
+                } else {
+                    alert(filaEditando ? "✅ ¡Datos editados correctamente!" : "✅ ¡Datos guardados en Google Sheets!");
+                }
+                
+                cargarClientesSilencioso();
+                btnSubmit.innerHTML = originalBtnText;
+                btnSubmit.disabled = false;
                 regresarMenu();
             } catch (error) {
                 alert("Error de conexión al guardar.");
+                btnSubmit.innerHTML = originalBtnText;
+                btnSubmit.disabled = false;
             }
         }
 
@@ -602,7 +648,8 @@
             resultados.slice().reverse().forEach(c => {
                 let detallesHTML = ""; let imagenHTML = "";
                 for (let key in c) {
-                    if (['fecha', 'genero', 'prenda', 'nombre', 'action', 'fila', 'estado', 'fecha_entrega', 'acuenta', 'saldo', 'total'].includes(key)) continue;
+                    // ignoramos 'anotacion_proceso' para no mostrarlo feo en la lista general
+                    if (['fecha', 'genero', 'prenda', 'nombre', 'action', 'fila', 'estado', 'fecha_entrega', 'acuenta', 'saldo', 'total', 'anotacion_proceso'].includes(key)) continue;
                     if (c[key] !== "") { 
                         if (key === 'foto_referencia' && c[key].startsWith('data:image')) {
                             imagenHTML = `<div class="mt-3"><p class="text-xs text-amber-500 uppercase font-bold mb-1">Foto:</p><img src="${c[key]}" class="h-32 rounded-lg object-cover border border-zinc-700"></div>`;
@@ -614,6 +661,7 @@
 
                 let esEntregado = c.estado === 'Entregado';
                 let nombreEstado = c.estado || 'Pendiente';
+                let estadoAnotacion = c.anotacion_proceso || c.estado; 
                 
                 let colorBadge = "bg-zinc-700 text-gray-300";
                 if(nombreEstado === 'Entregado') colorBadge = "bg-red-500/20 text-red-500";
@@ -640,12 +688,20 @@
                     `;
                 }
 
-                // Generación de Subestados visuales al cargar (Comprado/Cortado como texto fuerte)
-                let btnCompradoHTML = (nombreEstado === 'Comprado' || nombreEstado === 'Cortado')
+                // CAJA DE ANOTACIÓN (Se queda visible incluso si es Entregado, usando estadoAnotacion)
+                let detalleProceso = "";
+                if (estadoAnotacion === 'Comprado') {
+                    detalleProceso = `<div class="mt-3 text-xs text-purple-400 font-bold bg-purple-900/20 p-2 rounded-lg border border-purple-500/30">📌 Anotación: El material para esta prenda ya fue COMPRADO.</div>`;
+                } else if (estadoAnotacion === 'Cortado') {
+                    detalleProceso = `<div class="mt-3 text-xs text-indigo-400 font-bold bg-indigo-900/20 p-2 rounded-lg border border-indigo-500/30">📌 Anotación: La tela para esta prenda ya fue CORTADA.</div>`;
+                }
+
+                // LOS BOTONES QUE SE CONVIERTEN EN TEXTO FUERTE DE SU COLOR
+                let btnCompradoHTML = (estadoAnotacion === 'Comprado' || estadoAnotacion === 'Cortado')
                     ? `<span class="flex-1 text-purple-500 font-extrabold text-base md:text-lg tracking-wider text-center py-2 uppercase">COMPRADO</span>`
                     : `<button onclick="cambiarEstado(${c.fila}, 'Comprado', event)" class="flex-1 bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded-xl shadow-md text-xs transition-all">🛍️ Comprado</button>`;
 
-                let btnCortadoHTML = (nombreEstado === 'Cortado')
+                let btnCortadoHTML = (estadoAnotacion === 'Cortado')
                     ? `<span class="flex-1 text-indigo-500 font-extrabold text-base md:text-lg tracking-wider text-center py-2 uppercase">CORTADO</span>`
                     : `<button onclick="cambiarEstado(${c.fila}, 'Cortado', event)" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl shadow-md text-xs transition-all">✂️ Cortado</button>`;
 
@@ -670,8 +726,9 @@
                         
                         ${finanzasHTML}
 
-                        <div class="mt-2 leading-relaxed bg-zinc-900 p-3 rounded-lg border border-zinc-700">
+                        <div class="mt-2 leading-relaxed bg-zinc-900 p-3 rounded-lg border border-zinc-700 relative">
                             ${detallesHTML} ${imagenHTML}
+                            <div id="detalle-proceso-${c.fila}">${detalleProceso}</div>
                         </div>
                         
                         <div class="mt-4 flex justify-between items-center border-t border-zinc-700 pt-4" id="acciones-${c.fila}">
@@ -747,11 +804,18 @@
             btn.disabled = true;
 
             try {
+                // Al enviar "Comprado" o "Cortado", le decimos a Google que cree una columna "anotacion_proceso" para que el dato sobreviva al entregarlo
+                let payload = { action: "edit", fila: fila, estado: nuevoEstado };
+                if (nuevoEstado === 'Comprado' || nuevoEstado === 'Cortado') {
+                    payload.anotacion_proceso = nuevoEstado;
+                }
+
                 await fetch(WEB_APP_URL, {
                     method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ action: "edit", fila: fila, estado: nuevoEstado })
+                    body: JSON.stringify(payload)
                 });
                 
+                // Actualiza Etiqueta de arriba
                 const badge = document.getElementById(`badge-estado-${fila}`);
                 if (badge) {
                     badge.innerText = nuevoEstado;
@@ -760,6 +824,15 @@
                         nuevoEstado === 'Comprado' ? 'bg-purple-600/30 text-purple-400' :
                         nuevoEstado === 'Cortado' ? 'bg-indigo-600/30 text-indigo-400' : 'bg-zinc-700 text-gray-300'
                     }`;
+                }
+
+                const divDetalle = document.getElementById(`detalle-proceso-${fila}`);
+                if (divDetalle) {
+                    if (nuevoEstado === 'Comprado') {
+                        divDetalle.innerHTML = `<div class="mt-3 text-xs text-purple-400 font-bold bg-purple-900/20 p-2 rounded-lg border border-purple-500/30">📌 Anotación: El material para esta prenda ya fue COMPRADO.</div>`;
+                    } else if (nuevoEstado === 'Cortado') {
+                        divDetalle.innerHTML = `<div class="mt-3 text-xs text-indigo-400 font-bold bg-indigo-900/20 p-2 rounded-lg border border-indigo-500/30">📌 Anotación: La tela para esta prenda ya fue CORTADA.</div>`;
+                    }
                 }
 
                 if (nuevoEstado === 'Entregado') {
@@ -790,6 +863,8 @@
                         }
                     }
                 }
+                
+                cargarClientesSilencioso(); 
             } catch (error) {
                 alert("Error al actualizar estado.");
                 btn.innerHTML = originalText;
