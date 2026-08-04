@@ -8,6 +8,9 @@
     <style>
         .bg-dark { background-color: #080808; }
         .bg-card { background-color: #121212; }
+        /* Ocultar barra de scroll en carrusel pero permitir deslizar */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="bg-dark text-gray-100 font-sans min-h-screen flex flex-col justify-center items-center p-4 md:p-6">
@@ -74,6 +77,8 @@
             <button onclick="abrirFormulario('Hombre', 'Pantalón')" class="w-full py-4 text-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl font-medium text-left px-6 transition-colors">👖 Pantalón</button>
             <button onclick="abrirFormulario('Hombre', 'Saco')" class="w-full py-4 text-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl font-medium text-left px-6 transition-colors">🧥 Saco</button>
             <button onclick="abrirFormulario('Hombre', 'Chaleco')" class="w-full py-4 text-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl font-medium text-left px-6 transition-colors">🦺 Chaleco</button>
+            <button onclick="abrirFormulario('Hombre', 'Pantalón y Saco')" class="w-full py-4 text-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl font-medium text-left px-6 transition-colors">👖🧥 Pantalón y Saco</button>
+            <button onclick="abrirFormulario('Hombre', 'Pantalón y Chaleco')" class="w-full py-4 text-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl font-medium text-left px-6 transition-colors">👖🦺 Pantalón y Chaleco</button>
             <button onclick="abrirFormulario('Hombre', 'Traje Completo')" class="w-full py-4 text-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl font-medium text-left px-6 transition-colors">💼 Traje Completo</button>
             <button onclick="regresarMenu()" class="text-base text-gray-400 hover:text-white underline text-center mt-4">← Volver al Menú</button>
         </div>
@@ -85,6 +90,8 @@
             <button onclick="abrirFormulario('Mujer', 'Falda')" class="w-full py-4 text-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl font-medium text-left px-6 transition-colors">👗 Falda</button>
             <button onclick="abrirFormulario('Mujer', 'Saco')" class="w-full py-4 text-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl font-medium text-left px-6 transition-colors">🧥 Saco</button>
             <button onclick="abrirFormulario('Mujer', 'Chaleco')" class="w-full py-4 text-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl font-medium text-left px-6 transition-colors">🦺 Chaleco</button>
+            <button onclick="abrirFormulario('Mujer', 'Pantalón y Saco')" class="w-full py-4 text-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl font-medium text-left px-6 transition-colors">👖🧥 Pantalón y Saco</button>
+            <button onclick="abrirFormulario('Mujer', 'Pantalón y Chaleco')" class="w-full py-4 text-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl font-medium text-left px-6 transition-colors">👖🦺 Pantalón y Chaleco</button>
             <button onclick="abrirFormulario('Mujer', 'Traje Completo')" class="w-full py-4 text-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl font-medium text-left px-6 transition-colors">💼 Traje Completo</button>
             <button onclick="regresarMenu()" class="text-base text-gray-400 hover:text-white underline text-center mt-4">← Volver al Menú</button>
         </div>
@@ -95,8 +102,8 @@
             
             <div class="space-y-4 bg-zinc-900 p-5 rounded-xl border border-zinc-800 shadow-inner">
                 <div>
-                    <label class="block text-sm font-bold text-gray-300 uppercase mb-2">Nombre de la Medida</label>
-                    <input type="text" id="nuevo-campo-nombre" placeholder="Ej: Cintura, Tipo de Tela..." class="w-full p-3 text-base bg-zinc-800 border border-zinc-700 rounded-xl text-white focus:border-amber-500 focus:outline-none">
+                    <label class="block text-sm font-bold text-gray-300 uppercase mb-2">Nombre de la Medida / Sección</label>
+                    <input type="text" id="nuevo-campo-nombre" placeholder="Ej: Cintura, Tipo de Tela, Medidas del Saco..." class="w-full p-3 text-base bg-zinc-800 border border-zinc-700 rounded-xl text-white focus:border-amber-500 focus:outline-none">
                 </div>
                 
                 <div>
@@ -104,7 +111,8 @@
                     <select id="nuevo-campo-tipo" onchange="verificarTipoCampo()" class="w-full p-3 text-base bg-zinc-800 border border-zinc-700 rounded-xl text-white focus:border-amber-500 focus:outline-none">
                         <option value="text">Cuadro de Texto Corto</option>
                         <option value="number">Cuadro Numérico</option>
-                        <option value="select">Lista Desplegable (Menú de opciones)</option>
+                        <option value="select">Lista Desplegable (Menú)</option>
+                        <option value="separator">➖ Línea Separadora (Diseño)</option>
                     </select>
                 </div>
                 
@@ -121,6 +129,8 @@
                             <option value="Hombre-Pantalón">Hombre - Pantalón</option>
                             <option value="Hombre-Saco">Hombre - Saco</option>
                             <option value="Hombre-Chaleco">Hombre - Chaleco</option>
+                            <option value="Hombre-Pantalón y Saco">Hombre - Pantalón y Saco</option>
+                            <option value="Hombre-Pantalón y Chaleco">Hombre - Pantalón y Chaleco</option>
                             <option value="Hombre-Traje Completo">Hombre - Traje Completo</option>
                         </optgroup>
                         <optgroup label="👩 Mujer">
@@ -128,6 +138,8 @@
                             <option value="Mujer-Falda">Mujer - Falda</option>
                             <option value="Mujer-Saco">Mujer - Saco</option>
                             <option value="Mujer-Chaleco">Mujer - Chaleco</option>
+                            <option value="Mujer-Pantalón y Saco">Mujer - Pantalón y Saco</option>
+                            <option value="Mujer-Pantalón y Chaleco">Mujer - Pantalón y Chaleco</option>
                             <option value="Mujer-Traje Completo">Mujer - Traje Completo</option>
                         </optgroup>
                     </select>
@@ -146,10 +158,10 @@
                     <option value="Hombre-Pantalón">Solo Hombre - Pantalón</option>
                     <option value="Hombre-Saco">Solo Hombre - Saco</option>
                     <option value="Hombre-Chaleco">Solo Hombre - Chaleco</option>
+                    <option value="Hombre-Pantalón y Saco">Solo Hombre - Pantalón y Saco</option>
+                    <option value="Hombre-Pantalón y Chaleco">Solo Hombre - Pantalón y Chaleco</option>
                     <option value="Mujer-Pantalón">Solo Mujer - Pantalón</option>
-                    <option value="Mujer-Falda">Solo Mujer - Falda</option>
                     <option value="Mujer-Saco">Solo Mujer - Saco</option>
-                    <option value="Mujer-Chaleco">Solo Mujer - Chaleco</option>
                 </select>
             </div>
 
@@ -212,28 +224,26 @@
                     <input type="date" id="fecha-entrega" required class="w-full p-3.5 text-base bg-zinc-900 border border-blue-600/50 rounded-xl text-white focus:border-blue-400 focus:outline-none">
                 </div>
 
-                <!-- BLOQUE DE CÁMARA EN VIVO -->
+                <!-- BLOQUE DE CÁMARA CARRUSEL -->
                 <div class="mt-4 p-5 bg-zinc-900 border border-zinc-800 rounded-xl shadow-inner">
-                    <label class="block text-sm font-bold text-amber-500 uppercase mb-3">📸 Foto de Tela / Referencia</label>
+                    <label class="block text-sm font-bold text-amber-500 uppercase mb-3">📸 Fotos de Tela / Referencia</label>
                     
-                    <button type="button" id="btn-abrir-camara" onclick="iniciarCamara()" class="w-full py-3 text-base bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-white font-bold rounded-xl transition-all flex items-center justify-center space-x-2">
-                        <span>📷</span> <span>Abrir Cámara</span>
-                    </button>
+                    <!-- Contenedor Carrusel -->
+                    <div id="carrusel-fotos" class="hidden overflow-x-auto no-scrollbar snap-x snap-mandatory gap-3 w-full pb-2 mb-3">
+                        <!-- Las fotos se insertan aquí -->
+                    </div>
 
-                    <div id="contenedor-camara" class="hidden flex-col items-center w-full space-y-3 mt-3">
+                    <div id="contenedor-camara" class="hidden flex-col items-center w-full space-y-3 mb-3">
                         <video id="video-camara" autoplay playsinline class="w-full max-h-72 object-cover rounded-xl border-2 border-amber-600 shadow-md bg-black"></video>
-                        <button type="button" onclick="tomarFotoEnVivo()" class="w-full py-4 text-lg bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl shadow-[0_0_10px_rgba(217,119,6,0.5)] transition-all">
-                            📸 Capturar
-                        </button>
+                        <div class="flex gap-2 w-full">
+                            <button type="button" onclick="apagarCamara()" class="w-1/3 py-4 text-base bg-zinc-700 hover:bg-zinc-600 text-white font-bold rounded-xl transition-all">Cancelar</button>
+                            <button type="button" onclick="tomarFotoEnVivo()" class="w-2/3 py-4 text-lg bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl shadow-[0_0_10px_rgba(217,119,6,0.5)] transition-all">📸 Capturar</button>
+                        </div>
                     </div>
                     
-                    <div id="vista-previa-contenedor" class="hidden mt-3 flex-col items-center justify-center bg-zinc-950 p-4 rounded-xl border border-zinc-800 space-y-3">
-                        <!-- IMAGEN CON CLICK PARA MODAL -->
-                        <img id="vista-previa-foto" onclick="abrirModalImagen(this.src)" class="max-h-48 rounded-lg object-contain shadow-md border border-zinc-700 cursor-pointer hover:opacity-80 transition-opacity">
-                        <button type="button" onclick="descartarFoto()" class="w-full py-2 bg-red-600/80 hover:bg-red-500 text-white font-bold rounded-lg text-sm transition-colors mt-3">
-                            🔄 Descartar y Tomar Otra
-                        </button>
-                    </div>
+                    <button type="button" id="btn-abrir-camara" onclick="iniciarCamara()" class="w-full py-3.5 text-base bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-white font-bold rounded-xl transition-all flex items-center justify-center space-x-2">
+                        <span>📷</span> <span>Añadir Foto Nueva</span>
+                    </button>
 
                     <input type="hidden" id="foto-base64">
                 </div>
@@ -266,8 +276,9 @@
         let streamCamaraGlobal = null;
         let resultadosGlobales = []; 
         let filaEditando = null;
+        let fotosActuales = []; // Array para carrusel
 
-        // INICIALIZACIÓN (Carga silenciosa de clientes para prevenir duplicados)
+        // INICIALIZACIÓN
         window.addEventListener('DOMContentLoaded', () => {
             const logueado = localStorage.getItem('sastreria_logueado');
             if (logueado === 'true') {
@@ -283,7 +294,7 @@
             fetch(`${WEB_APP_URL}?action=get`)
                 .then(res => res.json())
                 .then(lista => { resultadosGlobales = lista; })
-                .catch(e => console.log("Carga silenciosa falló", e));
+                .catch(e => console.log("Carga falló", e));
         }
 
         window.addEventListener('popstate', (e) => {
@@ -292,31 +303,25 @@
             }
         });
 
-        // LÓGICA MODAL FOTOS
+        // MODAL FOTOS
         function abrirModalImagen(src) {
             const modal = document.getElementById('modal-imagen');
             const img = document.getElementById('img-modal');
             img.src = src;
             modal.classList.remove('hidden');
-            setTimeout(() => {
-                img.classList.replace('scale-95', 'scale-100');
-            }, 10);
+            setTimeout(() => { img.classList.replace('scale-95', 'scale-100'); }, 10);
         }
 
         function cerrarModalImagen() {
             const modal = document.getElementById('modal-imagen');
             const img = document.getElementById('img-modal');
             img.classList.replace('scale-100', 'scale-95');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                img.src = "";
-            }, 200);
+            setTimeout(() => { modal.classList.add('hidden'); img.src = ""; }, 200);
         }
 
         function formatearFechaTexto(fechaStr) {
             if (!fechaStr) return '';
             const meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
-            
             try {
                 if (fechaStr.includes('-')) {
                     const partes = fechaStr.split('T')[0].split('-');
@@ -434,7 +439,7 @@
             }
 
             camposPersonalizados.forEach((campo, index) => {
-                let etiquetaTipo = campo.tipo === 'select' ? 'Lista' : (campo.tipo === 'number' ? 'Núm.' : 'Texto');
+                let etiquetaTipo = campo.tipo === 'select' ? 'Lista' : (campo.tipo === 'separator' ? 'Línea ➖' : (campo.tipo === 'number' ? 'Núm.' : 'Texto'));
                 let badgeDestino = campo.destino === 'Todos' ? 'Global' : campo.destino.replace('-', ' ');
 
                 let btnArriba = index > 0 ? `<button onclick="moverCampo(${index}, -1)" class="bg-zinc-700 hover:bg-amber-600 text-white rounded p-2 text-xs transition-colors">⬆️</button>` : `<div class="w-8"></div>`;
@@ -463,6 +468,7 @@
             }
         }
 
+        // --- SISTEMA CARRUSEL DE CÁMARA ---
         async function iniciarCamara() {
             try {
                 const video = document.getElementById('video-camara');
@@ -472,11 +478,10 @@
                 video.srcObject = streamCamaraGlobal;
                 
                 document.getElementById('btn-abrir-camara').classList.add('hidden');
-                document.getElementById('vista-previa-contenedor').classList.add('hidden');
                 document.getElementById('contenedor-camara').classList.remove('hidden');
                 document.getElementById('contenedor-camara').classList.add('flex');
             } catch (error) {
-                alert("No se pudo acceder a la cámara. Asegúrate de dar permisos a tu navegador.");
+                alert("No se pudo acceder a la cámara. Asegúrate de dar permisos.");
             }
         }
 
@@ -485,38 +490,56 @@
                 streamCamaraGlobal.getTracks().forEach(track => track.stop());
                 streamCamaraGlobal = null;
             }
+            document.getElementById('contenedor-camara').classList.remove('flex');
+            document.getElementById('contenedor-camara').classList.add('hidden');
+            document.getElementById('btn-abrir-camara').classList.remove('hidden');
         }
 
         function tomarFotoEnVivo() {
             const video = document.getElementById('video-camara');
             const canvas = document.createElement('canvas');
-            const maxAncho = 600;
+            
+            // Compresión optimizada para guardar varias fotos sin saturar la base de datos
+            const maxAncho = 400; 
             const proporcion = maxAncho / video.videoWidth;
             canvas.width = maxAncho;
             canvas.height = video.videoHeight * proporcion;
             
             const ctx = canvas.getContext('2d');
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const base64Comprimido = canvas.toDataURL('image/jpeg', 0.6);
+            const base64Comprimido = canvas.toDataURL('image/jpeg', 0.45);
             
-            document.getElementById('vista-previa-foto').src = base64Comprimido;
-            document.getElementById('foto-base64').value = base64Comprimido;
-            
+            fotosActuales.push(base64Comprimido);
+            renderizarCarrusel();
             apagarCamara();
-            document.getElementById('contenedor-camara').classList.remove('flex');
-            document.getElementById('contenedor-camara').classList.add('hidden');
-            
-            document.getElementById('vista-previa-contenedor').classList.remove('hidden');
-            document.getElementById('vista-previa-contenedor').classList.add('flex');
-            
-            document.getElementById('btn-abrir-camara').classList.remove('hidden');
-            document.getElementById('btn-abrir-camara').innerHTML = "<span>📷</span> <span>Tomar foto nueva</span>";
         }
 
-        function descartarFoto() {
-            document.getElementById('foto-base64').value = "";
-            document.getElementById('vista-previa-contenedor').classList.add('hidden');
-            iniciarCamara();
+        function renderizarCarrusel() {
+            const carrusel = document.getElementById('carrusel-fotos');
+            if(fotosActuales.length === 0) {
+                carrusel.classList.add('hidden');
+                document.getElementById('foto-base64').value = "";
+                return;
+            }
+            
+            carrusel.classList.remove('hidden');
+            carrusel.classList.add('flex');
+            carrusel.innerHTML = "";
+            
+            fotosActuales.forEach((foto, i) => {
+                carrusel.innerHTML += `
+                    <div class="relative min-w-full flex-shrink-0 snap-center flex justify-center">
+                        <img src="${foto}" onclick="abrirModalImagen(this.src)" class="h-48 rounded-lg object-contain shadow-md border border-zinc-700 cursor-pointer">
+                        <button type="button" onclick="eliminarFoto(${i})" class="absolute top-1 right-2 bg-red-600/90 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold shadow-md hover:bg-red-500 transition-colors">X</button>
+                    </div>
+                `;
+            });
+            document.getElementById('foto-base64').value = JSON.stringify(fotosActuales);
+        }
+
+        function eliminarFoto(index) {
+            fotosActuales.splice(index, 1);
+            renderizarCarrusel();
         }
 
         function abrirFormulario(genero, prenda) {
@@ -526,15 +549,9 @@
             document.getElementById('form-titulo').innerText = `✏️ ${prenda.toUpperCase()} (${genero.toUpperCase()})`;
             
             document.getElementById('form-medidas').reset();
-            
+            fotosActuales = [];
+            renderizarCarrusel();
             apagarCamara();
-            document.getElementById('btn-abrir-camara').classList.remove('hidden');
-            document.getElementById('btn-abrir-camara').innerHTML = "<span>📷</span> <span>Abrir Cámara</span>";
-            document.getElementById('contenedor-camara').classList.add('hidden');
-            document.getElementById('contenedor-camara').classList.remove('flex');
-            document.getElementById('vista-previa-contenedor').classList.add('hidden');
-            document.getElementById('vista-previa-contenedor').classList.remove('flex');
-            document.getElementById('foto-base64').value = '';
             
             const contenedorDinamico = document.getElementById('campos-dinamicos-inyectados');
             contenedorDinamico.innerHTML = '';
@@ -548,7 +565,16 @@
 
             camposParaEstaPrenda.forEach(campo => {
                 let htmlCampo = '';
-                if (campo.tipo === 'select') {
+                if (campo.tipo === 'separator') {
+                    // Diseño elegante de la línea separadora
+                    htmlCampo = `
+                        <div class="w-full flex items-center my-6 opacity-80">
+                            <div class="flex-1 border-t border-zinc-600 border-dashed"></div>
+                            <span class="px-3 text-amber-500 text-xs font-bold uppercase tracking-widest">${campo.nombre}</span>
+                            <div class="flex-1 border-t border-zinc-600 border-dashed"></div>
+                        </div>
+                    `;
+                } else if (campo.tipo === 'select') {
                     let opcionesHTML = '<option value="">Selecciona una opción...</option>';
                     campo.opciones.split(',').forEach(opc => {
                         let opcLimpia = opc.trim(); 
@@ -594,7 +620,6 @@
             
             const nombreInput = document.getElementById('nombre-cliente').value.trim();
 
-            // CONTROL DE DUPLICADOS EXACTOS EN TIEMPO REAL
             if (!filaEditando) {
                 document.getElementById('form-titulo').innerText = "⌛ Verificando...";
                 try {
@@ -615,7 +640,7 @@
                         buscarCliente();
                         btnSubmit.innerHTML = originalBtnText;
                         btnSubmit.disabled = false;
-                        return; // Se detiene aquí, no guarda el duplicado.
+                        return;
                     }
                 }
             }
@@ -636,7 +661,6 @@
                 nombre: nombreInput
             };
             
-            // REINICIO DE ESTADO DE 'ENTREGADO' A 'PENDIENTE'
             let mostroMensajeReinicio = false;
             if (filaEditando) {
                 datos.fila = filaEditando;
@@ -645,7 +669,6 @@
                     datos.estado = 'Pendiente';
                     datos.anotacion_proceso = ''; 
                     mostroMensajeReinicio = true;
-                    
                     clienteViejo.estado = 'Pendiente';
                     clienteViejo.anotacion_proceso = '';
                 }
@@ -653,10 +676,13 @@
 
             const camposParaEstaPrenda = camposPersonalizados.filter(c => c.destino === 'Todos' || c.destino === identificadorActual);
             camposParaEstaPrenda.forEach(campo => {
-                const inputElement = document.getElementById(campo.id);
-                if(inputElement) datos[campo.nombre] = inputElement.value;
+                if (campo.tipo !== 'separator') {
+                    const inputElement = document.getElementById(campo.id);
+                    if(inputElement) datos[campo.nombre] = inputElement.value;
+                }
             });
 
+            // Guardar carrusel JSON
             const fotoData = document.getElementById('foto-base64').value;
             if(fotoData !== "") datos['foto_referencia'] = fotoData;
 
@@ -694,8 +720,33 @@
                 for (let key in c) {
                     if (['fecha', 'genero', 'prenda', 'nombre', 'action', 'fila', 'estado', 'fecha_entrega', 'acuenta', 'saldo', 'total', 'anotacion_proceso'].includes(key)) continue;
                     if (c[key] !== "") { 
-                        if (key === 'foto_referencia' && c[key].startsWith('data:image')) {
-                            imagenHTML = `<div class="mt-3"><p class="text-xs text-amber-500 uppercase font-bold mb-1">Foto:</p><img src="${c[key]}" onclick="abrirModalImagen(this.src)" class="h-32 rounded-lg object-cover border border-zinc-700 cursor-pointer hover:opacity-80 transition-opacity"></div>`;
+                        // COMPROBAR SI LA FOTO ES UN JSON ARRAY (Nuevo Carrusel) O STRING NORMAL (Antiguo)
+                        if (key === 'foto_referencia') {
+                            if (c[key].startsWith('[')) {
+                                try {
+                                    let arrayFotos = JSON.parse(c[key]);
+                                    let fotosHTML = '';
+                                    arrayFotos.forEach(foto => {
+                                        fotosHTML += `
+                                            <div class="min-w-full flex-shrink-0 snap-center flex justify-center">
+                                                <img src="${foto}" onclick="abrirModalImagen(this.src)" class="h-32 rounded-lg object-contain shadow-md border border-zinc-700 cursor-pointer hover:opacity-80 transition-opacity">
+                                            </div>`;
+                                    });
+                                    imagenHTML = `
+                                        <div class="mt-4">
+                                            <p class="text-xs text-amber-500 uppercase font-bold mb-1 flex justify-between">
+                                                <span>📸 Fotos registradas (${arrayFotos.length}):</span>
+                                                <span class="text-gray-500 font-normal lowercase tracking-widest text-[10px]">👉 desliza</span>
+                                            </p>
+                                            <div class="flex overflow-x-auto no-scrollbar snap-x snap-mandatory gap-2 pb-2 w-full">
+                                                ${fotosHTML}
+                                            </div>
+                                        </div>`;
+                                } catch(e) {}
+                            } else if (c[key].startsWith('data:image')) {
+                                // Soporte para clientes viejos
+                                imagenHTML = `<div class="mt-3"><p class="text-xs text-amber-500 uppercase font-bold mb-1">Foto:</p><img src="${c[key]}" onclick="abrirModalImagen(this.src)" class="h-32 rounded-lg object-contain shadow-md border border-zinc-700 cursor-pointer hover:opacity-80 transition-opacity"></div>`;
+                            }
                         } else {
                             detallesHTML += `<span class="text-gray-300 text-sm"><b class="text-gray-400 capitalize">${key}:</b> ${c[key]}</span><br>`;
                         }
@@ -704,7 +755,7 @@
 
                 let esEntregado = c.estado === 'Entregado';
                 let nombreEstado = c.estado || 'Pendiente';
-                let estadoAnotacion = c.anotacion_proceso || c.estado; 
+                let estadoAnotacion = c.anotacion_proceso || ''; 
                 
                 let colorBadge = "bg-zinc-700 text-gray-300";
                 if(nombreEstado === 'Entregado') colorBadge = "bg-red-500/20 text-red-500";
@@ -731,29 +782,22 @@
                     `;
                 }
 
-                // CAJA DE ANOTACIÓN PERMANENTE
-                let detalleProceso = "";
-                if (estadoAnotacion === 'Comprado') {
-                    detalleProceso = `<div class="mt-3 text-xs text-purple-400 font-bold bg-purple-900/20 p-2 rounded-lg border border-purple-500/30">📌 Anotación: El material para esta prenda ya fue COMPRADO.</div>`;
-                } else if (estadoAnotacion === 'Cortado') {
-                    detalleProceso = `<div class="mt-3 text-xs text-indigo-400 font-bold bg-indigo-900/20 p-2 rounded-lg border border-indigo-500/30">📌 Anotación: La tela para esta prenda ya fue CORTADA.</div>`;
+                // LÓGICA DE EXCLUSIVIDAD: Si ya se eligió Comprado o Cortado, EL OTRO BOTÓN YA NO EXISTE.
+                let subEstados = '';
+                if (!esEntregado) {
+                    if (estadoAnotacion === 'Comprado') {
+                        subEstados = `<div class="mt-2 flex w-full justify-center" id="subestados-${c.fila}"><span class="flex-1 text-purple-500 font-extrabold text-base md:text-lg tracking-wider text-center py-2 uppercase">COMPRADO</span></div>`;
+                    } else if (estadoAnotacion === 'Cortado') {
+                        subEstados = `<div class="mt-2 flex w-full justify-center" id="subestados-${c.fila}"><span class="flex-1 text-indigo-500 font-extrabold text-base md:text-lg tracking-wider text-center py-2 uppercase">CORTADO</span></div>`;
+                    } else {
+                        subEstados = `
+                            <div class="mt-2 flex gap-2 w-full items-center justify-center" id="subestados-${c.fila}">
+                                <button onclick="cambiarEstado(${c.fila}, 'Comprado', event)" class="flex-1 bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded-xl shadow-md text-xs transition-all">🛍️ Comprado</button>
+                                <button onclick="cambiarEstado(${c.fila}, 'Cortado', event)" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl shadow-md text-xs transition-all">✂️ Cortado</button>
+                            </div>
+                        `;
+                    }
                 }
-
-                // LÓGICA DE BOTONES MUTUAMENTE EXCLUYENTES
-                let btnCompradoHTML = (estadoAnotacion === 'Comprado')
-                    ? `<span class="flex-1 text-purple-500 font-extrabold text-base md:text-lg tracking-wider text-center py-2 uppercase">COMPRADO</span>`
-                    : `<button onclick="cambiarEstado(${c.fila}, 'Comprado', event)" class="flex-1 bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded-xl shadow-md text-xs transition-all">🛍️ Comprado</button>`;
-
-                let btnCortadoHTML = (estadoAnotacion === 'Cortado')
-                    ? `<span class="flex-1 text-indigo-500 font-extrabold text-base md:text-lg tracking-wider text-center py-2 uppercase">CORTADO</span>`
-                    : `<button onclick="cambiarEstado(${c.fila}, 'Cortado', event)" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl shadow-md text-xs transition-all">✂️ Cortado</button>`;
-
-                let subEstados = esEntregado ? '' : `
-                    <div class="mt-2 flex gap-2 w-full items-center justify-center" id="subestados-${c.fila}">
-                        ${btnCompradoHTML}
-                        ${btnCortadoHTML}
-                    </div>
-                `;
 
                 contenedor.innerHTML += `
                     <div class="p-4 bg-zinc-800 rounded-xl border-l-4 ${bordeTarjeta} space-y-2 shadow-md transition-all" id="tarjeta-${c.fila}">
@@ -771,7 +815,6 @@
 
                         <div class="mt-2 leading-relaxed bg-zinc-900 p-3 rounded-lg border border-zinc-700 relative">
                             ${detallesHTML} ${imagenHTML}
-                            <div id="detalle-proceso-${c.fila}">${detalleProceso}</div>
                         </div>
                         
                         <div class="mt-4 flex justify-between items-center border-t border-zinc-700 pt-4" id="acciones-${c.fila}">
@@ -868,15 +911,6 @@
                     }`;
                 }
 
-                const divDetalle = document.getElementById(`detalle-proceso-${fila}`);
-                if (divDetalle && (nuevoEstado === 'Comprado' || nuevoEstado === 'Cortado')) {
-                    if (nuevoEstado === 'Comprado') {
-                        divDetalle.innerHTML = `<div class="mt-3 text-xs text-purple-400 font-bold bg-purple-900/20 p-2 rounded-lg border border-purple-500/30">📌 Anotación: El material para esta prenda ya fue COMPRADO.</div>`;
-                    } else if (nuevoEstado === 'Cortado') {
-                        divDetalle.innerHTML = `<div class="mt-3 text-xs text-indigo-400 font-bold bg-indigo-900/20 p-2 rounded-lg border border-indigo-500/30">📌 Anotación: La tela para esta prenda ya fue CORTADA.</div>`;
-                    }
-                }
-
                 if (nuevoEstado === 'Entregado') {
                     const tarjeta = document.getElementById(`tarjeta-${fila}`);
                     if (tarjeta) {
@@ -890,19 +924,13 @@
                     const subestados = document.getElementById(`subestados-${fila}`);
                     if (subestados) subestados.remove(); 
                 } else if (nuevoEstado === 'Comprado' || nuevoEstado === 'Cortado') {
-                    
+                    // CÓDIGO ACTUALIZADO: Si elige uno, el otro desaparece definitivamente.
                     const contenedorSub = document.getElementById(`subestados-${fila}`);
                     if (contenedorSub) {
                         if (nuevoEstado === 'Comprado') {
-                            contenedorSub.innerHTML = `
-                                <span class="flex-1 text-purple-500 font-extrabold text-base md:text-lg tracking-wider text-center py-2 uppercase">COMPRADO</span>
-                                <button onclick="cambiarEstado(${fila}, 'Cortado', event)" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl shadow-md text-xs transition-all">✂️ Cortado</button>
-                            `;
+                            contenedorSub.innerHTML = `<span class="flex-1 text-purple-500 font-extrabold text-base md:text-lg tracking-wider text-center py-2 uppercase">COMPRADO</span>`;
                         } else if (nuevoEstado === 'Cortado') {
-                            contenedorSub.innerHTML = `
-                                <button onclick="cambiarEstado(${fila}, 'Comprado', event)" class="flex-1 bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded-xl shadow-md text-xs transition-all">🛍️ Comprado</button>
-                                <span class="flex-1 text-indigo-500 font-extrabold text-base md:text-lg tracking-wider text-center py-2 uppercase">CORTADO</span>
-                            `;
+                            contenedorSub.innerHTML = `<span class="flex-1 text-indigo-500 font-extrabold text-base md:text-lg tracking-wider text-center py-2 uppercase">CORTADO</span>`;
                         }
                     }
                 }
@@ -930,18 +958,25 @@
                 if(cliente.saldo) document.getElementById('pago-saldo').value = cliente.saldo;
                 if(cliente.total) document.getElementById('pago-total').value = cliente.total;
                 
+                // CARGAR EL CARRUSEL SI ERA JSON, O LA FOTO VIEJA SI ERA STRING
                 if(cliente.foto_referencia) {
-                    document.getElementById('vista-previa-foto').src = cliente.foto_referencia;
-                    document.getElementById('foto-base64').value = cliente.foto_referencia;
-                    document.getElementById('btn-abrir-camara').classList.add('hidden');
-                    document.getElementById('vista-previa-contenedor').classList.remove('hidden');
-                    document.getElementById('vista-previa-contenedor').classList.add('flex');
+                    if (cliente.foto_referencia.startsWith('[')) {
+                        try {
+                            fotosActuales = JSON.parse(cliente.foto_referencia);
+                            renderizarCarrusel();
+                        } catch(e) {}
+                    } else if (cliente.foto_referencia.startsWith('data:image')) {
+                        fotosActuales = [cliente.foto_referencia];
+                        renderizarCarrusel();
+                    }
                 }
 
                 camposPersonalizados.forEach(campo => {
-                    const inputElement = document.getElementById(campo.id);
-                    if(inputElement && cliente[campo.nombre]) {
-                        inputElement.value = cliente[campo.nombre];
+                    if (campo.tipo !== 'separator') {
+                        const inputElement = document.getElementById(campo.id);
+                        if(inputElement && cliente[campo.nombre]) {
+                            inputElement.value = cliente[campo.nombre];
+                        }
                     }
                 });
             }, 100);
