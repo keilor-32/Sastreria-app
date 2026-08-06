@@ -268,7 +268,7 @@
         <img id="img-modal" src="" class="max-w-full max-h-full object-contain rounded-xl shadow-[0_0_40px_rgba(0,0,0,0.8)] transition-transform transform scale-95 duration-300">
     </div>
 
-    <!-- Botón flotante para instalar PWA (Oculto por defecto) -->
+    <!-- Botón flotante para instalar PWA -->
     <button id="btn-instalar" class="hidden fixed bottom-6 right-6 bg-amber-600 hover:bg-amber-500 text-white font-bold py-4 px-5 rounded-full shadow-[0_4px_20px_rgba(217,119,6,0.5)] z-50 transition-transform transform hover:scale-105 flex items-center space-x-2 border border-amber-500">
         <span class="text-2xl">📱</span>
         <span class="text-base uppercase tracking-wider">Instalar App</span>
@@ -686,13 +686,26 @@
             let mostroMensajeReinicio = false;
             if (filaEditando) {
                 datos.fila = filaEditando;
-                const clienteViejo = resultadosGlobales.find(c => c.fila === filaEditando);
-                if (clienteViejo && clienteViejo.estado === 'Entregado') {
+                
+                // PREGUNTA INTELIGENTE DE REINICIO DE BOTONES
+                const reiniciar = confirm("Estás guardando cambios en un cliente existente.\n\n¿Deseas reiniciar los botones (Comprado/Cortado/Entregar) para empezar un NUEVO PEDIDO desde cero?\n\n• ACEPTAR = Sí, limpiar proceso y habilitar botones.\n• CANCELAR = No, solo estoy corrigiendo un dato (mantener proceso actual).");
+                
+                if (reiniciar) {
                     datos.estado = 'Pendiente';
                     datos.anotacion_proceso = ''; 
                     mostroMensajeReinicio = true;
-                    clienteViejo.estado = 'Pendiente';
-                    clienteViejo.anotacion_proceso = '';
+                    
+                    const clienteViejo = resultadosGlobales.find(c => c.fila === filaEditando);
+                    if(clienteViejo) {
+                        clienteViejo.estado = 'Pendiente';
+                        clienteViejo.anotacion_proceso = '';
+                    }
+                } else {
+                    const clienteViejo = resultadosGlobales.find(c => c.fila === filaEditando);
+                    if(clienteViejo) {
+                        datos.estado = clienteViejo.estado;
+                        datos.anotacion_proceso = clienteViejo.anotacion_proceso;
+                    }
                 }
             }
 
@@ -714,9 +727,9 @@
                 });
                 
                 if (mostroMensajeReinicio) {
-                    alert("✅ ¡Datos guardados exitosamente!\n\nAl modificar un pedido antiguo, su estado se ha reiniciado a PENDIENTE como si fuera un trabajo nuevo. El botón de Entregar volverá a aparecer.");
+                    alert("✅ ¡Datos guardados exitosamente!\n\nHas iniciado un NUEVO PEDIDO. Los botones de proceso (Comprado/Cortado/Entregar) han vuelto a la normalidad.");
                 } else {
-                    alert(filaEditando ? "✅ ¡Datos editados correctamente!" : "✅ ¡Datos guardados en Google Sheets!");
+                    alert(filaEditando ? "✅ ¡Corrección guardada correctamente!" : "✅ ¡Datos guardados en Google Sheets!");
                 }
                 
                 cargarClientesSilencioso();
@@ -798,7 +811,6 @@
                 let nombreEstado = c.estado || 'Pendiente';
                 let estadoAnotacion = c.anotacion_proceso || ''; 
                 
-                // Evaluar individualmente para el sistema mixto de botones
                 let isComprado = estadoAnotacion.includes('Comprado');
                 let isCortado = estadoAnotacion.includes('Cortado');
 
@@ -807,7 +819,6 @@
                 if(nombreEstado === 'Comprado' || isComprado) colorBadge = "bg-purple-600/30 text-purple-400";
                 if(nombreEstado === 'Cortado' || isCortado) colorBadge = "bg-indigo-600/30 text-indigo-400";
 
-                // Si tiene ambas, se muestra la más reciente (Cortado) en la etiqueta de arriba
                 let textoBadgeFinal = nombreEstado;
                 if (!esEntregado) {
                     if (isCortado) textoBadgeFinal = 'Cortado';
@@ -844,14 +855,13 @@
                     detalleProceso += `<div class="mt-3 text-xs text-indigo-400 font-bold bg-indigo-900/20 p-2 rounded-lg border border-indigo-500/30">📌 Anotación: La tela para esta prenda ya fue CORTADA.</div>`;
                 }
 
-                // NUEVA LÓGICA DE BOTONES MUTUAMENTE INDEPENDIENTES (Checkboxes)
                 let btnCompradoClass = isComprado
                     ? "flex-1 bg-purple-900/30 border border-purple-500 text-purple-400 font-bold py-2 rounded-xl shadow-md text-xs cursor-default transition-all"
-                    : "flex-1 bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded-xl shadow-md text-xs transition-all";
+                    : "flex-1 bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded-xl shadow-md text-xs transition-all cursor-pointer";
 
                 let btnCortadoClass = isCortado
                     ? "flex-1 bg-indigo-900/30 border border-indigo-500 text-indigo-400 font-bold py-2 rounded-xl shadow-md text-xs cursor-default transition-all"
-                    : "flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl shadow-md text-xs transition-all";
+                    : "flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl shadow-md text-xs transition-all cursor-pointer";
 
                 let subEstados = esEntregado ? '' : `
                     <div class="mt-2 flex gap-2 w-full items-center justify-center" id="subestados-${c.fila}">
