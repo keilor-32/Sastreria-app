@@ -268,7 +268,7 @@
         <img id="img-modal" src="" class="max-w-full max-h-full object-contain rounded-xl shadow-[0_0_40px_rgba(0,0,0,0.8)] transition-transform transform scale-95 duration-300">
     </div>
 
-    <!-- Botón flotante para instalar PWA -->
+    <!-- Botón flotante para instalar PWA (Oculto por defecto) -->
     <button id="btn-instalar" class="hidden fixed bottom-6 right-6 bg-amber-600 hover:bg-amber-500 text-white font-bold py-4 px-5 rounded-full shadow-[0_4px_20px_rgba(217,119,6,0.5)] z-50 transition-transform transform hover:scale-105 flex items-center space-x-2 border border-amber-500">
         <span class="text-2xl">📱</span>
         <span class="text-base uppercase tracking-wider">Instalar App</span>
@@ -294,6 +294,10 @@
                 history.replaceState({ seccion: 'sec-login' }, "", "");
             }
         });
+
+        function normalizarTexto(txt) {
+            return txt ? txt.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim() : "";
+        }
 
         function cargarClientesSilencioso() {
             fetch(`${WEB_APP_URL}?action=get`)
@@ -652,9 +656,11 @@
                 const prendaSeleccionada = document.getElementById('form-prenda').value;
                 document.getElementById('form-titulo').innerText = `📝 ${prendaSeleccionada.toUpperCase()} (${generoSeleccionado.toUpperCase()})`;
 
-                const existe = resultadosGlobales.find(c => c.nombre && c.nombre.trim().toLowerCase() === nombreInput.toLowerCase());
+                const nombreBuscado = normalizarTexto(nombreInput);
+                const existe = resultadosGlobales.find(c => c.nombre && normalizarTexto(c.nombre) === nombreBuscado);
+                
                 if (existe) {
-                    const irAlPerfil = confirm(`⚠️ EL CLIENTE YA ESTÁ REGISTRADO: "${existe.nombre}"\n\n¿Deseas ir a los usuarios registrados para crearle un nuevo pedido reciclando sus medidas?\n\n(Aceptar = Ir al cliente | Cancelar = Ignorar y registrar de todos modos)`);
+                    const irAlPerfil = confirm(`⚠️ EL CLIENTE YA ESTÁ REGISTRADO: "${existe.nombre}"\n\n¿Deseas ir a los usuarios registrados para crearle un nuevo pedido reciclando sus medidas?\n\n(Aceptar = Ir al perfil | Cancelar = Ignorar advertencia y registrar)`);
                     if (irAlPerfil) {
                         cambiarSeccion('sec-buscar');
                         document.getElementById('input-buscar').value = existe.nombre;
@@ -687,19 +693,12 @@
             if (filaEditando) {
                 datos.fila = filaEditando;
                 
-                // PREGUNTA INTELIGENTE DE REINICIO DE BOTONES
-                const reiniciar = confirm("Estás guardando cambios en un cliente existente.\n\n¿Deseas reiniciar los botones (Comprado/Cortado/Entregar) para empezar un NUEVO PEDIDO desde cero?\n\n• ACEPTAR = Sí, limpiar proceso y habilitar botones.\n• CANCELAR = No, solo estoy corrigiendo un dato (mantener proceso actual).");
+                const reiniciar = confirm("Estás guardando cambios en un cliente existente.\n\n¿Deseas reiniciar los botones de proceso (Comprado/Cortado/Entregar) para empezar un NUEVO PEDIDO desde cero?\n\n• ACEPTAR = Sí, reiniciar los botones.\n• CANCELAR = No, solo estoy corrigiendo un dato.");
                 
                 if (reiniciar) {
                     datos.estado = 'Pendiente';
-                    datos.anotacion_proceso = ''; 
+                    datos.anotacion_proceso = ' '; // Espacio en blanco fuerza el reseteo en la base de datos
                     mostroMensajeReinicio = true;
-                    
-                    const clienteViejo = resultadosGlobales.find(c => c.fila === filaEditando);
-                    if(clienteViejo) {
-                        clienteViejo.estado = 'Pendiente';
-                        clienteViejo.anotacion_proceso = '';
-                    }
                 } else {
                     const clienteViejo = resultadosGlobales.find(c => c.fila === filaEditando);
                     if(clienteViejo) {
@@ -727,7 +726,7 @@
                 });
                 
                 if (mostroMensajeReinicio) {
-                    alert("✅ ¡Datos guardados exitosamente!\n\nHas iniciado un NUEVO PEDIDO. Los botones de proceso (Comprado/Cortado/Entregar) han vuelto a la normalidad.");
+                    alert("✅ ¡Datos guardados exitosamente!\n\nSe han reiniciado los botones de proceso para este nuevo pedido.");
                 } else {
                     alert(filaEditando ? "✅ ¡Corrección guardada correctamente!" : "✅ ¡Datos guardados en Google Sheets!");
                 }
@@ -745,7 +744,7 @@
 
         function renderizarListaClientes(resultados, contenedor) {
             if (resultados.length === 0) {
-                contenedor.innerHTML = "<p class='text-gray-400 text-lg text-center'>No hay clientes que mostrar.</p>"; return;
+                contenedor.innerHTML = "<p class='text-gray-400 text-lg text-center'>No se encontraron resultados.</p>"; return;
             }
 
             contenedor.innerHTML = "";
@@ -753,7 +752,7 @@
                 let detallesHTML = ""; 
                 let imagenHTML = "";
 
-                if (c.foto_referencia && c.foto_referencia !== "") { 
+                if (c.foto_referencia && c.foto_referencia.trim() !== "") { 
                     if (c.foto_referencia.startsWith('[')) {
                         try {
                             let arrayFotos = JSON.parse(c.foto_referencia);
@@ -795,21 +794,21 @@
                         `;
                     } else {
                         keysProcesadas.push(campo.nombre);
-                        if (c[campo.nombre] && c[campo.nombre] !== "") {
+                        if (c[campo.nombre] && c[campo.nombre].toString().trim() !== "") {
                             detallesHTML += `<span class="text-gray-300 text-sm block mb-1"><b class="text-gray-400 capitalize">${campo.nombre}:</b> ${c[campo.nombre]}</span>`;
                         }
                     }
                 });
 
                 for (let key in c) {
-                    if (!keysProcesadas.includes(key) && c[key] !== "") {
+                    if (!keysProcesadas.includes(key) && c[key] !== undefined && c[key].toString().trim() !== "") {
                         detallesHTML += `<span class="text-gray-300 text-sm block mb-1"><b class="text-gray-400 capitalize">${key}:</b> ${c[key]}</span>`;
                     }
                 }
 
                 let esEntregado = c.estado === 'Entregado';
                 let nombreEstado = c.estado || 'Pendiente';
-                let estadoAnotacion = c.anotacion_proceso || ''; 
+                let estadoAnotacion = (c.anotacion_proceso || '').trim(); 
                 
                 let isComprado = estadoAnotacion.includes('Comprado');
                 let isCortado = estadoAnotacion.includes('Cortado');
@@ -856,17 +855,20 @@
                 }
 
                 let btnCompradoClass = isComprado
-                    ? "flex-1 bg-purple-900/30 border border-purple-500 text-purple-400 font-bold py-2 rounded-xl shadow-md text-xs cursor-default transition-all"
+                    ? "flex-1 bg-transparent border-2 border-purple-500 text-purple-400 font-bold py-2 rounded-xl shadow-none text-xs cursor-default transition-all"
                     : "flex-1 bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded-xl shadow-md text-xs transition-all cursor-pointer";
 
                 let btnCortadoClass = isCortado
-                    ? "flex-1 bg-indigo-900/30 border border-indigo-500 text-indigo-400 font-bold py-2 rounded-xl shadow-md text-xs cursor-default transition-all"
+                    ? "flex-1 bg-transparent border-2 border-indigo-500 text-indigo-400 font-bold py-2 rounded-xl shadow-none text-xs cursor-default transition-all"
                     : "flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl shadow-md text-xs transition-all cursor-pointer";
+
+                let onclickComprado = isComprado ? "" : `onclick="cambiarEstado(${c.fila}, 'Comprado', event)"`;
+                let onclickCortado = isCortado ? "" : `onclick="cambiarEstado(${c.fila}, 'Cortado', event)"`;
 
                 let subEstados = esEntregado ? '' : `
                     <div class="mt-2 flex gap-2 w-full items-center justify-center" id="subestados-${c.fila}">
-                        <button onclick="if(!${isComprado}) cambiarEstado(${c.fila}, 'Comprado', event)" class="${btnCompradoClass}">🛍️ Comprado</button>
-                        <button onclick="if(!${isCortado}) cambiarEstado(${c.fila}, 'Cortado', event)" class="${btnCortadoClass}">✂️ Cortado</button>
+                        <button id="btn-comprado-${c.fila}" ${onclickComprado} class="${btnCompradoClass}">🛍️ COMPRADO</button>
+                        <button id="btn-cortado-${c.fila}" ${onclickCortado} class="${btnCortadoClass}">✂️ CORTADO</button>
                     </div>
                 `;
 
@@ -901,7 +903,7 @@
         }
 
         async function buscarCliente() {
-            const query = document.getElementById('input-buscar').value.toLowerCase().trim();
+            const query = normalizarTexto(document.getElementById('input-buscar').value);
             const contenedor = document.getElementById('resultados-busqueda');
             if (!query) return;
             
@@ -915,7 +917,7 @@
                 let resultados = lista.filter(item => {
                     for (let key in item) {
                         if (key === 'foto_referencia' || key === 'action') continue; 
-                        if (item[key] && item[key].toString().toLowerCase().includes(query)) {
+                        if (item[key] && normalizarTexto(item[key].toString()).includes(query)) {
                             return true;
                         }
                     }
@@ -973,10 +975,11 @@
             btn.disabled = true;
 
             const clienteActual = resultadosGlobales.find(c => c.fila === fila) || {};
-            let anotacionActual = clienteActual.anotacion_proceso || '';
+            let anotacionActual = (clienteActual.anotacion_proceso || '').trim();
+            let estadoActual = clienteActual.estado || 'Pendiente';
 
             try {
-                let payload = { action: "edit", fila: fila, estado: nuevoEstado };
+                let payload = { action: "edit", fila: fila };
                 
                 if (nuevoEstado === 'Comprado' || nuevoEstado === 'Cortado') {
                     if (!anotacionActual.includes(nuevoEstado)) {
@@ -984,8 +987,11 @@
                     }
                     payload.anotacion_proceso = anotacionActual;
                     clienteActual.anotacion_proceso = anotacionActual;
-                    clienteActual.estado = nuevoEstado;
+                    
+                    payload.estado = estadoActual !== 'Entregado' ? nuevoEstado : 'Entregado';
+                    clienteActual.estado = payload.estado;
                 } else if (nuevoEstado === 'Entregado') {
+                    payload.estado = 'Entregado';
                     clienteActual.estado = 'Entregado';
                 }
 
@@ -994,31 +1000,40 @@
                     body: JSON.stringify(payload)
                 });
                 
+                // ACTUALIZACIÓN VISUAL INSTANTÁNEA
                 let isComprado = anotacionActual.includes('Comprado');
                 let isCortado = anotacionActual.includes('Cortado');
 
-                const badge = document.getElementById(`badge-estado-${fila}`);
-                if (badge) {
-                    badge.innerText = nuevoEstado;
-                    badge.className = `px-2 py-1 text-[10px] rounded uppercase font-bold tracking-widest ${
-                        nuevoEstado === 'Entregado' ? 'bg-red-500/20 text-red-500' :
-                        nuevoEstado === 'Comprado' ? 'bg-purple-600/30 text-purple-400' :
-                        nuevoEstado === 'Cortado' ? 'bg-indigo-600/30 text-indigo-400' : 'bg-zinc-700 text-gray-300'
-                    }`;
-                }
-
-                const divDetalle = document.getElementById(`detalle-proceso-${fila}`);
-                if (divDetalle) {
-                    divDetalle.innerHTML = '';
-                    if (isComprado) {
-                        divDetalle.innerHTML += `<div class="mt-3 text-xs text-purple-400 font-bold bg-purple-900/20 p-2 rounded-lg border border-purple-500/30">📌 Anotación: El material para esta prenda ya fue COMPRADO.</div>`;
+                if (nuevoEstado === 'Comprado' || nuevoEstado === 'Cortado') {
+                    const btnComprado = document.getElementById(`btn-comprado-${fila}`);
+                    const btnCortado = document.getElementById(`btn-cortado-${fila}`);
+                    
+                    if (nuevoEstado === 'Comprado' && btnComprado) {
+                        btnComprado.className = "flex-1 bg-transparent border-2 border-purple-500 text-purple-400 font-bold py-2 rounded-xl shadow-none text-xs cursor-default transition-all";
+                        btnComprado.onclick = null; 
+                        btnComprado.innerHTML = "🛍️ COMPRADO";
                     }
-                    if (isCortado) {
-                        divDetalle.innerHTML += `<div class="mt-3 text-xs text-indigo-400 font-bold bg-indigo-900/20 p-2 rounded-lg border border-indigo-500/30">📌 Anotación: La tela para esta prenda ya fue CORTADA.</div>`;
+                    if (nuevoEstado === 'Cortado' && btnCortado) {
+                        btnCortado.className = "flex-1 bg-transparent border-2 border-indigo-500 text-indigo-400 font-bold py-2 rounded-xl shadow-none text-xs cursor-default transition-all";
+                        btnCortado.onclick = null;
+                        btnCortado.innerHTML = "✂️ CORTADO";
                     }
-                }
 
-                if (nuevoEstado === 'Entregado') {
+                    const badge = document.getElementById(`badge-estado-${fila}`);
+                    if (badge && estadoActual !== 'Entregado') {
+                        badge.innerText = nuevoEstado;
+                        let colorBadge = nuevoEstado === 'Comprado' ? "bg-purple-600/30 text-purple-400" : "bg-indigo-600/30 text-indigo-400";
+                        badge.className = `px-2 py-1 text-[10px] rounded uppercase font-bold tracking-widest ${colorBadge}`;
+                    }
+
+                    const divDetalle = document.getElementById(`detalle-proceso-${fila}`);
+                    if (divDetalle) {
+                        let html = '';
+                        if (isComprado) html += `<div class="mt-3 text-xs text-purple-400 font-bold bg-purple-900/20 p-2 rounded-lg border border-purple-500/30">📌 Anotación: El material para esta prenda ya fue COMPRADO.</div>`;
+                        if (isCortado) html += `<div class="mt-3 text-xs text-indigo-400 font-bold bg-indigo-900/20 p-2 rounded-lg border border-indigo-500/30">📌 Anotación: La tela para esta prenda ya fue CORTADA.</div>`;
+                        divDetalle.innerHTML = html;
+                    }
+                } else if (nuevoEstado === 'Entregado') {
                     const tarjeta = document.getElementById(`tarjeta-${fila}`);
                     if (tarjeta) {
                         tarjeta.classList.remove('border-amber-500');
@@ -1030,23 +1045,13 @@
                     }
                     const subestados = document.getElementById(`subestados-${fila}`);
                     if (subestados) subestados.remove(); 
-                } else {
-                    const contenedorSub = document.getElementById(`subestados-${fila}`);
-                    if (contenedorSub) {
-                        let classComp = isComprado 
-                            ? "flex-1 bg-purple-900/30 border border-purple-500 text-purple-400 font-bold py-2 rounded-xl shadow-md text-xs cursor-default transition-all" 
-                            : "flex-1 bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded-xl shadow-md text-xs transition-all";
-                        let classCort = isCortado 
-                            ? "flex-1 bg-indigo-900/30 border border-indigo-500 text-indigo-400 font-bold py-2 rounded-xl shadow-md text-xs cursor-default transition-all" 
-                            : "flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl shadow-md text-xs transition-all";
-
-                        contenedorSub.innerHTML = `
-                            <button onclick="if(!${isComprado}) cambiarEstado(${fila}, 'Comprado', event)" class="${classComp}">🛍️ Comprado</button>
-                            <button onclick="if(!${isCortado}) cambiarEstado(${fila}, 'Cortado', event)" class="${classCort}">✂️ Cortado</button>
-                        `;
+                    
+                    const badge = document.getElementById(`badge-estado-${fila}`);
+                    if (badge) {
+                        badge.innerText = "ENTREGADO";
+                        badge.className = `px-2 py-1 text-[10px] rounded uppercase font-bold tracking-widest bg-red-500/20 text-red-500`;
                     }
                 }
-                cargarClientesSilencioso(); 
             } catch (error) {
                 alert("Error al actualizar estado.");
                 btn.innerHTML = originalText;
@@ -1071,7 +1076,7 @@
                 if(cliente.saldo) document.getElementById('pago-saldo').value = cliente.saldo;
                 if(cliente.total) document.getElementById('pago-total').value = cliente.total;
                 
-                if(cliente.foto_referencia) {
+                if(cliente.foto_referencia && cliente.foto_referencia.trim() !== "") {
                     if (cliente.foto_referencia.startsWith('[')) {
                         try {
                             fotosActuales = JSON.parse(cliente.foto_referencia);
